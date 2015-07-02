@@ -1,0 +1,91 @@
+#!/bin/bash
+tpEvento=210200
+#Código do evento:
+#210200 – Confirmação da Operação
+#210210 – Ciência da Operação
+#210220 – Desconhecimento da Operação
+#210240 – Operação não Realizada
+
+descEvento="Confirmacao da Operacao"
+#Informar a descrição do evento:
+#Confirmacao da Operacao
+#Ciencia da Operacao
+#Desconhecimento da Operacao
+#Operacao nao Realizada
+
+if [ "$6" == "" ]; then
+   echo "Uso:"
+   echo "$0 <cnpjDestinatario> <chaveNFe> <CodigoUfNFE> <DiretorioDestino> <caminhoCertificado> <senhaCertificado>"
+   exit
+fi
+
+DiretorioEventos=/basepro/importacoes/nf_e/eventos/
+mkdir -p $DiretorioEventos
+cd $DiretorioEventos
+
+fenixSped=FenixSped
+chaveNFE=$2
+CNPJ=$1
+CodigoUFDestino=$3
+DiretorioDestino=$4
+caminhoCertificado=$5
+senhaCertificado=$6
+nSeqEvento=1
+
+cArquivoXmlConfRece="$chaveNFE-ConfiRece.xml"
+
+cArquivoXmlConfReceRetorno="$chaveNFE-ConfiReceRetorno.xml"
+
+
+cArquivoXmlSolicita="$chaveNFE-nfeDonwloadNF.xml"
+
+cArquivoXmlSolicitaRetorno="$chaveNFE-nfeDownloadNF-Ret.xml"
+
+
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $cArquivoXmlConfRece
+echo "<envEvento versao=\"1.00\" xmlns=\"http://www.portalfiscal.inf.br/nfe\">" >> $cArquivoXmlConfRece
+echo "<idLote>1</idLote>" >> $cArquivoXmlConfRece
+echo "<evento versao=\"1.00\">" >> $cArquivoXmlConfRece
+echo "<infEvento Id=\"ID" >> $cArquivoXmlConfRece
+echo $tpEvento >> $cArquivoXmlConfRece
+echo $chaveNFE>> $cArquivoXmlConfRece
+echo "0" >> $cArquivoXmlConfRece
+echo $nSeqEvento>> $cArquivoXmlConfRece
+echo "\">" >> $cArquivoXmlConfRece
+echo "<cOrgao>91</cOrgao><tpAmb>1</tpAmb>" >> $cArquivoXmlConfRece
+echo "<CNPJ>$CNPJ</CNPJ>" >> $cArquivoXmlConfRece
+echo "<chNFe>$chaveNFE</chNFe>" >> $cArquivoXmlConfRece
+echo "<dhEvento>$(date '+%Y-%m-%dT%H:%m:%S%:z')</dhEvento>" >> $cArquivoXmlConfRece
+echo "<tpEvento>$tpEvento</tpEvento>" >> $cArquivoXmlConfRece
+echo "<nSeqEvento>$nSeqEvento</nSeqEvento>" >> $cArquivoXmlConfRece
+echo "<verEvento>1.00</verEvento><detEvento versao=\"1.00\">" >> $cArquivoXmlConfRece
+echo "<descEvento>$descEvento</descEvento>" >> $cArquivoXmlConfRece
+#echo "<xJust></xJust>"
+#Informar a justificativa porque a operação não foi realizada, este
+#campo deve ser informado somente no evento de Operação não
+#Realizada.
+echo "</detEvento></infEvento></evento></envEvento>" >> $cArquivoXmlConfRece
+
+
+$fenixSped assinar $DiretorioEventos/$cArquivoXmlConfRece  $caminhoCertificado $senhaCertificado
+
+$fenixSped nfeEvento  $DiretorioEventos/$cArquivoXmlConfRece $DiretorioEventos/$cArquivoXmlConfReceRetorno $caminhoCertificado $senhaCertificado "https://www.nfe.fazenda.gov.br/RecepcaoEvento/RecepcaoEvento.asmx" 
+
+
+
+
+
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" > $cArquivoXmlSolicita
+echo "<downloadNFe xmlns=\"http://www.portalfiscal.inf.br/nfe\" versao=\"1.00\">" >> $cArquivoXmlSolicita
+echo "<tpAmb>1</tpAmb>"  >> $cArquivoXmlSolicita
+echo "<xServ>DOWNLOAD NFE</xServ>"  >> $cArquivoXmlSolicita
+echo "<CNPJ>$CNPJ</CNPJ>"  >> $cArquivoXmlSolicita
+echo "<chNFe>$chaveNFE</chNFe>"  >> $cArquivoXmlSolicita
+echo "</downloadNFe>"  >> $cArquivoXmlSolicita
+
+
+$fenixSped nfeDownloadNF $DiretorioEventos/$cArquivoXmlSolicita $DiretorioEventos/$cArquivoXmlSolicitaRetorno $caminhoCertificado $senhaCertificado "https://www.nfe.fazenda.gov.br/NfeDownloadNF/NfeDownloadNF.asmx" $CodigoUFDestino "$DiretorioDestino$chaveNFE.xml"
+
+
+
+ 

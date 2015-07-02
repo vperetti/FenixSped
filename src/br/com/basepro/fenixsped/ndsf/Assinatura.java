@@ -1,0 +1,531 @@
+/*
+    Copyright 2009-2015 Vinicius Peretti
+    This file is part of FenixSped.
+
+    FenixSped is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    FenixSped is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package br.com.basepro.fenixsped.ndsf;
+
+import br.com.basepro.fenixsped.assinaturaXml.X509KeySelector;
+import br.com.basepro.fenixsped.util.TextFormat;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.security.KeyStore;
+import java.security.Provider;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+
+import javax.xml.crypto.dsig.CanonicalizationMethod;
+import javax.xml.crypto.dsig.DigestMethod;
+import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.SignatureMethod;
+import javax.xml.crypto.dsig.SignedInfo;
+import javax.xml.crypto.dsig.Transform;
+import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMSignContext;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
+import javax.xml.crypto.dsig.keyinfo.X509Data;
+import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
+import javax.xml.crypto.dsig.spec.TransformParameterSpec;
+import javax.xml.parsers.DocumentBuilder;
+
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+
+/**
+ *
+ * @author vinicius
+ */
+public class Assinatura {
+    private static final String C14N_TRANSFORM_METHOD = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
+    private static final String PROVIDER_CLASS_NAME = "org.jcp.xml.dsig.internal.dom.XMLDSigRI";
+    private static final String PROVIDER_NAME = "jsr105Provider";
+/*
+    public static void main(String[] args) {
+		Assinatura seg = new Assinatura();
+		seg.setTexto("00000000140NF   00000000002320080201T NN000000000200000000000000020000064212000000029001474845");
+		System.out.println(seg.getTextoAssinado());
+	}
+*/
+	private String texto;
+	private String textoAssinado;
+
+    
+    
+    public void assinar(String caminhoXml, String caminhoCertificado, String senha, String caminhoXmlNovo) throws Exception {
+
+
+
+        Assinatura seg = new Assinatura();
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        Document doc = dbf.newDocumentBuilder().parse(new FileInputStream(caminhoXml));
+        String textoAssinatura = "";
+	Double valorTotal = new Double("0");
+	Double valorTotalServicos;
+	Double valorTotalDeducoes;
+
+	
+	
+	valorTotalServicos = new Double(((Element) doc.getDocumentElement().getElementsByTagName("ValorTotalServicos").item(0)).getTextContent());
+	valorTotalDeducoes = new Double(((Element) doc.getDocumentElement().getElementsByTagName("ValorTotalDeducoes").item(0)).getTextContent());
+	valorTotal = valorTotalServicos - valorTotalDeducoes;
+	
+        doc.setXmlStandalone(true);
+        doc.getDocumentElement().removeAttribute("xmlns:ns2");
+
+
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("InscricaoMunicipalPrestador").item(0)).getTextContent(),"0",11,1);
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("SerieRPS").item(0)).getTextContent()," ",5,2);
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("NumeroRPS").item(0)).getTextContent(),"0",12,1);
+        textoAssinatura += (((Element) doc.getDocumentElement().getElementsByTagName("DataEmissaoRPS").item(0)).getTextContent()).substring(0,10).replaceAll("-", "");
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("Tributacao").item(0)).getTextContent()," ",2,2);
+        textoAssinatura += ((Element) doc.getDocumentElement().getElementsByTagName("SituacaoRPS").item(0)).getTextContent();
+        textoAssinatura += (((Element) doc.getDocumentElement().getElementsByTagName("TipoRecolhimento").item(0)).getTextContent().equalsIgnoreCase("A")) ? "N" : "S";
+        
+        
+        //textoAssinatura += TextFormat.fillWith(valorTotal.toString().replaceAll("[./-]", ""),"0",15,1);
+        //textoAssinatura += TextFormat.fillWith(valorTotalDeducoes.toString().replaceAll("[./-]", ""),"0",15,1);
+	System.out.println(String.format ("%.2f", valorTotal));
+	System.out.println(String.format ("%.2f", valorTotalDeducoes));
+        textoAssinatura += TextFormat.fillWith(String.format ("%.2f", valorTotal).replaceAll("[./-]", ""),"0",15,1);
+        textoAssinatura += TextFormat.fillWith(String.format ("%.2f", valorTotalDeducoes).replaceAll("[./-]", ""),"0",15,1);
+
+	textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("CodigoAtividade").item(0)).getTextContent(),"0",10,1);
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("CPFCNPJTomador").item(0)).getTextContent(),"0",14,1);
+
+        seg.setTexto(textoAssinatura);
+        System.out.println(textoAssinatura);
+        ((Element) doc.getDocumentElement().getElementsByTagName("Assinatura").item(0)).setTextContent(seg.getTextoAssinado());
+        
+
+        // Output the resulting document.
+        //OutputStream os = new FileOutputStream(caminhoXmlNovo);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer trans = tf.newTransformer();
+        trans.transform(new DOMSource(doc), new StreamResult(os));
+
+        //novo
+        File fout = new File(caminhoXmlNovo);
+        FileOutputStream out = new FileOutputStream(fout);
+        out.write(os.toByteArray());
+
+    }
+
+	public String getTexto() {
+		return texto;
+	}
+	public void setTexto(String texto) {
+		this.texto = texto;
+
+		MessageDigest sha1;
+		try {
+			sha1 = MessageDigest.getInstance("SHA-1");
+			sha1.update(texto.getBytes());
+			byte[] hashSHA1 = sha1.digest();
+			StringBuilder s = new StringBuilder();
+			for (int i = 0; i < hashSHA1.length; i++) {
+			   int parteAlta = ((hashSHA1[i] >> 4) & 0xf) << 4;
+			   int parteBaixa = hashSHA1[i] & 0xf;
+			   if (parteAlta == 0)
+				   s.append('0');
+			   s.append(Integer.toHexString(parteAlta | parteBaixa));
+			}
+			textoAssinado = s.toString();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String getTextoAssinado() {
+		return textoAssinado;
+	}
+	public void setTextoAssinado(String textoAssinado) {
+		this.textoAssinado = textoAssinado;
+	}
+
+        public static void main(String[] args) throws Exception {
+
+        if (args.length < 3) {
+            System.out.println("Argumentos:\n\n comando <arquivoXmlOrigem> <arquivoCertificado> <senha> [arquivoXmlDestino]");
+            return;
+        }
+        String caminhoXml = args[0];
+        String caminhoCertificado = args[1];
+        String senha = args[2];
+        String arquivoXmlNovo = args[0];
+        if (args.length == 4) {
+            arquivoXmlNovo = args[3];
+        }
+
+
+        File file = new File(caminhoXml);
+        if (!file.exists()) {
+            System.out.println("Arquivo " + caminhoXml + " não encontrado!");
+            return;
+        }
+        file = new File(caminhoCertificado);
+        if (!file.exists()) {
+            System.out.println("Arquivo " + caminhoCertificado + " não encontrado!");
+            return;
+        }
+        try {
+            Assinatura t = new Assinatura();
+
+            /*
+            if (isLote(caminhoXml)){
+                String caminhoXmlNFe = caminhoXml+"-nfe.xml";
+                StringBuffer bufferLoteCab = new StringBuffer();
+                StringBuffer bufferLoteRod = new StringBuffer();
+                StringBuffer bufferNFe = new StringBuffer();
+                StringBuffer bufferLoteAss = new StringBuffer();
+
+
+
+                //separa nfe em caminhoXmlNFe
+                BufferedReader reader = new BufferedReader(new FileReader(caminhoXml));
+
+                bufferNFe.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+
+                String line = reader.readLine();
+                int nLinha = 1;
+                while (line!=null) {
+                    if (nLinha <= 3){
+                        bufferLoteCab.append(line);
+                        //bufferLoteCab.append('\n');
+                    }else{
+                        if (line.equalsIgnoreCase("</enviNFe>") ){
+                            bufferLoteRod.append(line);
+                        }else{
+                            bufferNFe.append(line);
+                        }
+                    }
+                    nLinha++;
+                    line = reader.readLine();
+                }
+
+                FileWriter fw = new FileWriter(caminhoXmlNFe);
+                fw.write(bufferNFe.substring(0));
+                fw.close();
+
+                t.assinar(caminhoXmlNFe, caminhoCertificado, senha, caminhoXmlNFe+"-assinado");
+
+
+
+                //monta arquivo lote no arquivoXmlNovo
+                bufferLoteAss.append(bufferLoteCab);
+                BufferedReader readerAss = new BufferedReader(new FileReader(caminhoXmlNFe+"-assinado"));
+
+                String lineAss = readerAss.readLine();
+
+                int nLinhaAss = 1;
+                while (lineAss!=null) {
+                    if (nLinhaAss == 1){
+                        bufferLoteAss.append(lineAss.substring(38));
+                        bufferLoteAss.append('\n');
+                    }else{
+                        bufferLoteAss.append(lineAss);
+                        bufferLoteAss.append('\n');
+                    }
+                    nLinhaAss++;
+                    lineAss = readerAss.readLine();
+                }
+                bufferLoteAss.append(bufferLoteRod);
+
+
+                FileWriter fwAss = new FileWriter(arquivoXmlNovo);
+                fwAss.write(bufferLoteAss.substring(0));
+                fwAss.close();
+
+
+
+
+
+
+
+
+
+
+
+
+            }else{*/
+                t.assinar2(caminhoXml, caminhoCertificado, senha, arquivoXmlNovo);
+                /*
+            }
+
+            */
+
+
+            System.out.println("Arquivo xml assinado com sucesso " + caminhoXml + "!");
+        } catch (Exception e) {
+            System.out.println("Erro ao tentar assinar arquivo xml! \n\n" );
+            e.printStackTrace();
+        }
+    }
+
+
+
+public void assinar2(String caminhoXml, String caminhoCertificado, String senha, String caminhoXmlNovo) throws Exception {
+        String tag = "";
+        String tipoDocumento = "";
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(false);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document docs = builder.parse(new File(caminhoXml));
+	Double valorTotal = new Double("0");
+	Double valorTotalServicos;
+	Double valorTotalDeducoes;
+
+         // Busca nome do elemento raiz para verificar q tipo de documento a assinar
+        tipoDocumento = docs.getDocumentElement().getNodeName();
+
+
+        if (tipoDocumento.equals("ns1:ReqConsultaNotas")) {
+            tag = "Cabecalho";
+        } else {
+            tag = "Lote";
+        }
+        
+
+
+
+        //Create a DOM XMLSignatureFactory that will be used to
+        //generate the enveloped signature.
+        String providerName = System.getProperty(PROVIDER_NAME, PROVIDER_CLASS_NAME);
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());
+
+        // Create a Reference to the enveloped document (in this case,
+        // you are signing the whole document, so a URI of "" signifies
+        // that, and also specify the SHA1 digest algorithm and
+        // the ENVELOPED Transform.
+        ArrayList transformList = new ArrayList();
+        TransformParameterSpec tps = null;
+        Transform envelopedTransform = fac.newTransform(Transform.ENVELOPED, tps);
+        Transform c14NTransform = fac.newTransform(C14N_TRANSFORM_METHOD, tps);
+        transformList.add(envelopedTransform);
+        transformList.add(c14NTransform);
+
+
+
+
+        // Load the KeyStore and get the signing key and certificate.
+        KeyStore ks = KeyStore.getInstance("PKCS12");
+        ks.load(new FileInputStream(caminhoCertificado), senha.toCharArray());
+        Enumeration aliasesEnum = ks.aliases();
+        String alias = "";
+        while (aliasesEnum.hasMoreElements()) {
+            alias = (String) aliasesEnum.nextElement();
+
+            if (ks.isKeyEntry(alias)) {
+                break;
+            }
+        }
+
+        KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry) ks.getEntry(alias, new KeyStore.PasswordProtection(senha.toCharArray()));
+
+        X509Certificate cert = (X509Certificate) keyEntry.getCertificate();
+
+        // Create the KeyInfo containing the X509Data.
+        KeyInfoFactory kif = fac.getKeyInfoFactory();
+        List x509Content = new ArrayList();
+        x509Content.add(cert);
+        X509Data xd = kif.newX509Data(x509Content);
+        KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
+
+        // Instantiate the document to be signed.
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        //dbf.setNamespaceAware(false);
+        Document doc = dbf.newDocumentBuilder().parse(new FileInputStream(caminhoXml));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        try {
+
+
+        Assinatura seg = new Assinatura();
+        String textoAssinatura = "";
+
+        doc.setXmlStandalone(true);
+        doc.getDocumentElement().removeAttribute("xmlns:ns2");
+
+	valorTotalServicos = new Double(((Element) doc.getDocumentElement().getElementsByTagName("ValorTotalServicos").item(0)).getTextContent());
+	valorTotalDeducoes = new Double(((Element) doc.getDocumentElement().getElementsByTagName("ValorTotalDeducoes").item(0)).getTextContent());
+	valorTotal = valorTotalServicos - valorTotalDeducoes;
+
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("InscricaoMunicipalPrestador").item(0)).getTextContent(),"0",11,1);
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("SerieRPS").item(0)).getTextContent()," ",5,2);
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("NumeroRPS").item(0)).getTextContent(),"0",12,1);
+        textoAssinatura += (((Element) doc.getDocumentElement().getElementsByTagName("DataEmissaoRPS").item(0)).getTextContent()).substring(0,10).replaceAll("-", "");
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("Tributacao").item(0)).getTextContent()," ",2,2);
+        textoAssinatura += ((Element) doc.getDocumentElement().getElementsByTagName("SituacaoRPS").item(0)).getTextContent();
+        textoAssinatura += (((Element) doc.getDocumentElement().getElementsByTagName("TipoRecolhimento").item(0)).getTextContent().equalsIgnoreCase("A")) ? "N" : "S";
+
+
+        textoAssinatura += TextFormat.fillWith(String.format ("%.2f", valorTotal).replaceAll("[,/./-]", ""),"0",15,1);
+        textoAssinatura += TextFormat.fillWith(String.format ("%.2f", valorTotalDeducoes).replaceAll("[,/./-]", ""),"0",15,1);
+	
+	
+	
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("CodigoAtividade").item(0)).getTextContent(),"0",10,1);
+        textoAssinatura += TextFormat.fillWith(((Element) doc.getDocumentElement().getElementsByTagName("CPFCNPJTomador").item(0)).getTextContent(),"0",14,1);
+
+        seg.setTexto(textoAssinatura);
+        System.out.println(textoAssinatura);
+        ((Element) doc.getDocumentElement().getElementsByTagName("Assinatura").item(0)).setTextContent(seg.getTextoAssinado());
+
+
+        } catch (Exception e) {
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //Lista cada tag a ser assinada
+        for (int i = 0; i < doc.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
+
+            // Obtem elemento do documento a ser assinado, será criado uma
+            // REFERENCE para o mesmo
+            NodeList elements = docs.getElementsByTagName(tag);
+            Element el = (Element) elements.item(i);
+            String id = el.getAttribute("Id");
+            //Reference ref = fac.newReference("#" + id, fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+            Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+
+            // Create the SignedInfo.
+            SignedInfo si = fac.newSignedInfo(fac.newCanonicalizationMethod(
+                    CanonicalizationMethod.INCLUSIVE,
+                    (C14NMethodParameterSpec) null), fac.newSignatureMethod(SignatureMethod.RSA_SHA1, null),
+                    Collections.singletonList(ref));
+
+            // Create a DOMSignContext and specify the RSA PrivateKey and
+            // location of the resulting XMLSignature's parent element.
+            DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), doc.getDocumentElement().getElementsByTagName(tag).item(i).getParentNode());
+
+            // Create the XMLSignature, but don't sign it yet.
+            XMLSignature signature = fac.newXMLSignature(si, ki);
+
+            // Marshal, generate, and sign the enveloped signature.
+            signature.sign(dsc);
+        }
+
+
+
+
+        doc.setXmlStandalone(true);
+        doc.getDocumentElement().removeAttribute("xmlns:ns2");
+//        if (tag.equalsIgnoreCase("infNFe")) {
+//            ((Element) doc.getDocumentElement().getElementsByTagName("NFe").item(0)).setAttribute("xmlns", "http://www.portalfiscal.inf.br/nfe");
+//            ((Element) doc.getDocumentElement().getElementsByTagName("infNFe").item(0)).setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+//        }
+
+
+        // Output the resulting document.
+        //OutputStream os = new FileOutputStream(caminhoXmlNovo);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer trans = tf.newTransformer();
+        trans.transform(new DOMSource(doc), new StreamResult(os));
+
+        //System.out.println("===\n"+os.toString()+"\n====");
+
+
+        //novo
+        File fout = new File(caminhoXmlNovo);
+        FileOutputStream out = new FileOutputStream(fout);
+        out.write(os.toByteArray());
+
+
+
+        // Verifica as assinaturas
+        // Find Signature element.
+        NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+        if (nl.getLength() == 0) {
+            throw new Exception("Cannot find Signature element");
+        }
+        for (int i = 0; i < nl.getLength(); i++) {
+            // Create a DOMValidateContext and specify a KeySelector and document context.
+            DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(ks), nl.item(i));
+            // Unmarshal the XMLSignature.
+            XMLSignature signatures = fac.unmarshalXMLSignature(valContext);
+            // Validate the XMLSignature.
+            boolean coreValidity = signatures.validate(valContext);
+            // Check core validation status.
+            if (coreValidity == false) {
+                System.err.println("Falha na Assinatura!");
+            } else {
+                System.out.println("Assinatura Correta!");
+            }
+        }
+    }
+
+
+
+
+}

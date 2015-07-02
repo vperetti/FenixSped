@@ -1,0 +1,10 @@
+@ECHO OFF
+echo "================================================================================" > c:\FenixSped\FenixSped.log
+echo "Executando em $(date "+%Y-%m-%y %k:%m:%S")" >> c:\FenixSped\FenixSped.log
+echo "java -jar \executaveis\FenixSped.jar %1 %2 %3 %4 %5 %6 %7 %8" >> c:\FenixSped\FenixSped.log
+C:\Progra~1\Java\jre6\bin\java -cp c:\FenixSped\lib\axiom-api-1.2.10.jar;c:\FenixSped\lib\axiom-dom-1.2.10.jar;c:\FenixSped\lib\axiom-impl-1.2.10.jar;c:\FenixSped\lib\axis2-adb-1.5.4.jar;c:\FenixSped\lib\axis2-adb-codegen-1.5.4.jar;c:\FenixSped\lib\axis2-ant-plugin-1.5.4.jar;c:\FenixSped\lib\axis2-clustering-1.5.4.jar;c:\FenixSped\lib\axis2-codegen-1.5.4.jar;c:\FenixSped\lib\axis2-corba-1.5.4.jar;c:\FenixSped\lib\axis2-fastinfoset-1.5.4.jar;c:\FenixSped\lib\axis2-java2wsdl-1.5.4.jar;c:\FenixSped\lib\axis2-jaxbri-1.5.4.jar;c:\FenixSped\lib\axis2-jaxws-1.5.4.jar;c:\FenixSped\lib\axis2-jibx-1.5.4.jar;c:\FenixSped\lib\axis2-json-1.5.4.jar;c:\FenixSped\lib\axis2-kernel-1.5.4.jar;c:\FenixSped\lib\axis2-metadata-1.5.4.jar;c:\FenixSped\lib\axis2-mtompolicy-1.5.4.jar;c:\FenixSped\lib\axis2-saaj-1.5.4.jar;c:\FenixSped\lib\axis2-soapmonitor-servlet-1.5.4.jar;c:\FenixSped\lib\axis2-spring-1.5.4.jar;c:\FenixSped\lib\axis2-transport-http-1.5.4.jar;c:\FenixSped\lib\axis2-transport-local-1.5.4.jar;c:\FenixSped\lib\axis2-xmlbeans-1.5.4.jar;c:\FenixSped\lib\axis-ant.jar;c:\FenixSped\lib\axis.jar;c:\FenixSped\lib\axis-schema.jar;c:\FenixSped\lib\commons-codec-1.3.jar;c:\FenixSped\lib\commons-discovery-0.2.jar;c:\FenixSped\lib\commons-fileupload-1.2.jar;c:\FenixSped\lib\commons-httpclient-3.1.jar;c:\FenixSped\lib\commons-io-1.4.jar;c:\FenixSped\lib\commons-logging-1.0.4.jar;c:\FenixSped\lib\commons-logging-1.1.1.jar;c:\FenixSped\lib\httpcore-4.0.jar;c:\FenixSped\lib\jaxrpc.jar;c:\FenixSped\lib\jdom.jar;c:\FenixSped\lib\log4j-1.2.8.jar;c:\FenixSped\lib\mail.jar;c:\FenixSped\lib\neethi-2.0.4.jar;c:\FenixSped\lib\saaj.jar;c:\FenixSped\lib\wsdl4j-1.5.1.jar;c:\FenixSped\lib\XmlSchema-1.4.3.jar -jar c:\FenixSped\FenixSped.jar %1 %2 %3 %4 %5 %6 %7 %8 >> c:\FenixSped\FenixSped.log
+
+rem Pause
+
+@ECHO ON
+

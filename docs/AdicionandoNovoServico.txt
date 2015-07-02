@@ -1,0 +1,48 @@
+Fonte:
+http://www.basepro.com.br/wiki/index.php?title=P%C3%A1gina_principal#Adicionando_Novo_Servi.C3.A7o
+ou
+http://wiki.basepro.com.br/wiki/index.php?title=P%C3%A1gina_principal#Adicionando_Novo_Servi.C3.A7o
+
+Adicionando Novo Serviço
+
+No diretório do projeto acessar utilitariosAdicionaServico Utilizar o comando ~/lib/axis2-1.5.4/bin/wsdl2java.sh
+
+Para criar codigo do serviço ~/lib/axis2-1.5.4/bin/wsdl2java.sh -p <nome do pacote java> -uri <URI do WSDL>
+
+Ajuda do Comando ~/lib/axis2-1.5.4/bin/wsdl2java.sh --help
+
+
+Exemplo para gerar código do serviço NfeDownloadNF
+
+Baixe o XML do WSDL de https://www.nfe.fazenda.gov.br/NfeDownloadNF/NfeDownloadNF.asmx?WSDL (necessário autenticação por certificado) no subdiretório wsdls/
+
+Rode: ./wsdl2java.sh -p br.com.basepro.fenixsped.ws.nfedownloadnf -uri wsdls/NfeDownloadNF.asmx.xml
+
+Os arquivos serao gerados no diretório src/br/com/basepro/fenixsped/ws/nfedownloadnf/
+
+Copie o diretório br para o diretorio src da raiz do projeto
+
+Atualize os fontes pelo netbeans
+
+mova o diretório br para dentro do diretório antigos dentro de utilitariosAdicionaServicoAdicionando Novo Serviço
+
+No diretório do projeto acessar utilitariosAdicionaServico Utilizar o comando ~/lib/axis2-1.5.4/bin/wsdl2java.sh
+
+Para criar codigo do serviço ~/lib/axis2-1.5.4/bin/wsdl2java.sh -p <nome do pacote java> -uri <URI do WSDL>
+
+Ajuda do Comando ~/lib/axis2-1.5.4/bin/wsdl2java.sh --help
+
+
+Exemplo para gerar código do serviço NfeDownloadNF
+
+Baixe o XML do WSDL de https://www.nfe.fazenda.gov.br/NfeDownloadNF/NfeDownloadNF.asmx?WSDL (necessário autenticação por certificado) no subdiretório wsdls/
+
+Rode: ./wsdl2java.sh -p br.com.basepro.fenixsped.ws.nfedownloadnf -uri wsdls/NfeDownloadNF.asmx.xml
+
+Os arquivos serao gerados no diretório src/br/com/basepro/fenixsped/ws/nfedownloadnf/
+
+Copie o diretório br para o diretorio src da raiz do projeto
+
+Atualize os fontes pelo netbeans
+
+mova o diretório br para dentro do diretório antigos dentro de utilitariosAdicionaServico  
