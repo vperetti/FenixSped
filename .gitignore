@@ -1,0 +1,25 @@
+/dist/
+/build/
+
+# Dados de teste com certificados e XMLs sensiveis
+/test/
+
+# Keystores e certificados (qualquer local)
+*.jks
+*.pfx
+*.p12
+*.pem
+*.key
+jssecacerts
+
+# NetBeans private
+/nbproject/private/
+
+# Pacotes de distribuicao binaria e releases extraidos
+*.tar.bz2
+*.zip
+/FenixSped/
+
+# IDE
+*.swp
+*~

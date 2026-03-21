@@ -1,0 +1,17 @@
+FenixSped
+
+Veja mais informações em http://fenixsped.sourceforge.net/
+
+Uso via linha de comando:
+
+Executar: "java -jar FenixSped.jar" para ver ajuda.
+
+Uso como biblioteca:
+
+Ver documentação em http://fenixsped.sourceforge.net/javadoc/
+
+
+Dúvidas ou sugestões entrar em contato pelo site: http://fenixsped.sourceforge.net/ 
+Suporte comercial em http://www.basepro.com.br/
+
+

@@ -1,0 +1,349 @@
+#!/bin/bash
+
+
+#cExecuta := 'FenixSped '+cTipoNFSE+'_nfeRecepcao "' +;
+#                  cCaminho_e_File_Copia       + '" "' +;
+#                  cCaminho_e_File_Retorno     + '" "' +;
+#                  cCaminho_e_File_Certificado + '" "' +;
+#                  cSenha_do_Certificado       + '" "' +;
+#                  cCaminho_da_Web_Service     + '" "' +;
+#                  substr(fCodCidCliFo (M->cCGCEmpresa,SIM,NAO,NAO,NAO,NAO,SIM,SIM),1,6) +; // Alterado na Revisão: 01.10-Qgb ( Vinícius)
+#                  '"'
+#yum install jq -y
+
+cComando=$1
+CodigoMuni=$7
+
+
+
+cCaminho_e_File_Copia=$2
+cCaminho_e_File_Retorno=$3
+cCaminho_e_File_Certificado=$4
+cSenha_do_Certificado=$5
+cCaminho_da_Web_Service=$6
+
+ 
+
+#//openssl pkcs12 -in meu-certificado.pfx -out certificado_completo.pem -nodes -passin pass:SUA_SENHA_AQUI
+# 3. Verifica se o .pem já existe para não sobrescrever
+if [ "$cComando" == "snns_nfeRecepcao" ];then
+
+if [ -f "$cCaminho_e_File_Certificado.pem" ]; then
+    echo "O arquivo '$cCaminho_e_File_Certificado.pem' já existe.."   >> /basepro/logs/FenixSnns.log
+else
+    echo "Iniciando conversão de PFX para PEM..."
+
+    # 4. Realiza a conversão
+    # -nodes: não criptografa a chave privada de saída
+    # -passin: passa a senha de entrada para o openssl
+    openssl pkcs12 -in "$cCaminho_e_File_Certificado" \
+                   -out "$cCaminho_e_File_Certificado.pem" \
+                   -nodes \
+                   -passin pass:"$cSenha_do_Certificado" 2>/dev/null
+
+    # 5. Validação do sucesso do comando anterior
+    if [ $? -eq 0 ]; then
+        echo "Sucesso: Certificado convertido em '$cCaminho_e_File_Certificado.pem'"
+        # Ajusta permissão para que apenas o dono possa ler (Segurança)
+        chmod 600 "$cCaminho_e_File_Certificado.pem"
+    else
+        echo "Erro: Falha na conversão. Verifique se a senha está correta."
+        exit 1
+    fi
+fi
+
+
+###if [ -f "$cCaminho_e_File_Certificado-privkey.pem" ]; then
+###    echo "O arquivo '$cCaminho_e_File_Certificado-privkey.pem' já existe.."
+###else
+###    echo "Iniciando conversão de PFX para PEM..."
+###
+###    # 4. Realiza a conversão
+###    # -nodes: não criptografa a chave privada de saída
+###    # -passin: passa a senha de entrada para o openssl
+###    openssl pkcs12 -in "$cCaminho_e_File_Certificado" \
+###                   -nocerts -out "$cCaminho_e_File_Certificado-privkey.pem" \
+###                   -nodes \
+###                   -passin pass:"$cSenha_do_Certificado" 2>/dev/null
+###
+###    # 5. Validação do sucesso do comando anterior
+###    if [ $? -eq 0 ]; then
+###        echo "Sucesso: Certificado convertido em '$cCaminho_e_File_Certificado-privkey.pem'"
+###        # Ajusta permissão para que apenas o dono possa ler (Segurança)
+###        chmod 600 "$cCaminho_e_File_Certificado-privkey.pem"
+###    else
+###        echo "Erro: Falha na conversão. Verifique se a senha está correta."
+###        exit 1
+###    fi
+###fi
+###
+####openssl pkcs12 -in certificado.pfx -nocerts -out chave_privada.pem -nodes
+###
+###
+###if [ -f "$cCaminho_e_File_Certificado-certs.pem" ]; then
+###    echo "O arquivo '$cCaminho_e_File_Certificado-certs.pem' já existe.."
+###else
+###    echo "Iniciando conversão de PFX para PEM..."
+###
+###    # 4. Realiza a conversão
+###    # -nodes: não criptografa a chave privada de saída
+###    # -passin: passa a senha de entrada para o openssl
+###    openssl pkcs12 -in "$cCaminho_e_File_Certificado" \
+###                   -clcerts -nokeys -out "$cCaminho_e_File_Certificado-certs.pem" \
+###                   -nodes \
+###                   -passin pass:"$cSenha_do_Certificado" 2>/dev/null
+###
+###    # 5. Validação do sucesso do comando anterior
+###    if [ $? -eq 0 ]; then
+###        echo "Sucesso: Certificado convertido em '$cCaminho_e_File_Certificado-certs.pem'"
+###        # Ajusta permissão para que apenas o dono possa ler (Segurança)
+###        chmod 600 "$cCaminho_e_File_Certificado-certs.pem"
+###    else
+###        echo "Erro: Falha na conversão. Verifique se a senha está correta."
+###        exit 1
+###    fi
+###fi
+###
+####openssl pkcs12 -in certificado.pfx -clcerts -nokeys -out certificado.pem
+
+
+fi
+
+
+
+
+
+
+#sendo DOURADOS direciona para Betha
+if [ "$1" != "snns_assinar" ];then
+if [ "$CodigoMuni" == "500370" ];then
+ cComando="betha_$1"
+fi
+
+#sendo SINOP direciona para Coplan
+if [ "$CodigoMuni" == "510790" ];then
+ cComando="coplan_$1"
+fi
+fi
+
+if [ "$cComando" == "snns_nfeRecepcao" ];then
+
+
+cCaminho_e_File_Copia=$2
+cCaminho_e_File_Retorno=$3
+cCaminho_e_File_Certificado=$4
+cSenha_do_Certificado=$5
+cCaminho_da_Web_Service=$6
+
+
+
+# 1. Compacta o XML e converte para Base64 em uma variável
+CONTEUDO_B64=$(gzip -c $cCaminho_e_File_Copia | base64 -w 0)
+
+# 2. Cria o JSON usando o jq (forma mais segura de evitar erros de sintaxe)
+echo "{}" | jq --arg xml "$CONTEUDO_B64" '.dpsXmlGZipB64 = $xml' > $cCaminho_e_File_Copia.json
+
+
+#curl -v --tlsv1.2 --cert "$cCaminho_e_File_Certificado.pem" \
+#-X POST "https://sefin.producaorestrita.nfse.gov.br/SefinNacional/nfse" \
+#-H "Content-Type: application/json" \
+#-H "Accept: application/json" \
+#--data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno
+
+##curl -v --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" \
+
+echo "curl -v --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" \
+-X POST "https://sefin.nfse.gov.br/SefinNacional/nfse" \
+-H "Content-Type: application/json" \
+-H "Accept: application/json" \
+--data-binary \"@$cCaminho_e_File_Copia.json\"" >> /basepro/logs/FenixSnns.log
+
+curl -v --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" \
+-X POST "https://sefin.nfse.gov.br/SefinNacional/nfse" \
+-H "Content-Type: application/json" \
+-H "Accept: application/json" \
+--data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno 2>> /basepro/logs/FenixSnns.log
+
+cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-"$( date +%Y%m%d%H%M%S%N )
+
+#curl -v --tlsv1.2 --cert "$cCaminho_e_File_Certificado.pem" -X POST "https://sefin.nfse.gov.br/SefinNacional/nfse" -H "Content-Type: application/json" -H "Accept: application/json" --data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno
+
+
+exit
+fi
+
+if [ "$cComando" == "snns_danfse" ];then
+
+
+cCaminho_e_File_Copia=$2
+cCaminho_e_File_Retorno=$3
+cCaminho_e_File_Certificado=$4
+cSenha_do_Certificado=$5
+cCaminho_da_Web_Service=$6
+CodigoMuni=$7
+
+##https://adn.producaorestrita.nfse.gov.br/danfse/{chaveAcesso}
+
+
+curl -v --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" \
+-X GET "https://adn.nfse.gov.br/danfse/$cCaminho_e_File_Copia" \
+-H "Accept: application/pdf" \
+--output $cCaminho_e_File_Retorno
+
+
+##26116062200153298000170000000000000126010001057598
+
+exit
+fi
+
+
+
+
+
+
+if [ "$cComando" == "betha_snns_nfeRecepcao" ];then
+
+
+cCaminho_e_File_Copia=$2
+cCaminho_e_File_Retorno=$3
+cCaminho_e_File_Certificado=$4
+cSenha_do_Certificado=$5
+cCaminho_da_Web_Service=$6
+
+echo "Betha Recepcao"
+
+
+
+
+
+
+#curl -v --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" \
+#-X POST "https://sefin.nfse.gov.br/SefinNacional/nfse" \
+#-H "Content-Type: application/json" \
+#-H "Accept: application/json" \
+#--data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno
+#
+#cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-"$( date +%Y%m%d%H%M%S%N )
+
+#curl -v --tlsv1.2 --cert "$cCaminho_e_File_Certificado.pem" -X POST "https://sefin.nfse.gov.br/SefinNacional/nfse" -H "Content-Type: application/json" -H "Accept: application/json" --data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno
+
+
+ARQUIVO_DPS=$cCaminho_e_File_Copia
+#CONTEUDO_DPS=$(cat "$ARQUIVO_DPS")
+CONTEUDO_DPS=$(sed 's/<?xml[^>]*?>//g' "$ARQUIVO_DPS")
+ARQUIVO_ENVELOPE="$ARQUIVO_DPS-envelope.xml"
+
+echo "ARQUIVO_DPS $ARQUIVO_DPS"
+echo "ARQUIVO_ENVELOPE $ARQUIVO_ENVELOPE"
+
+# Gera o arquivo pedido.xml com o envelope SOAP
+cat <<EOF > $ARQUIVO_ENVELOPE
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="http://www.betha.com.br/e-nota-dps" xmlns:xd="http://www.w3.org/2000/09/xmldsig#">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <RecepcionarDpsEnvio>
+         $CONTEUDO_DPS
+      </RecepcionarDpsEnvio>
+   </soapenv:Body>
+</soapenv:Envelope>
+EOF
+
+echo "curl"
+
+curl --request POST  --cert "$cCaminho_e_File_Certificado.pem" \
+  --url https://nota-eletronica.betha.cloud/dps/ws \
+  --header 'Content-Type: text/xml;charset=UTF-8' \
+  --header 'SOAPAction: ""' \
+  --header 'Expect:' \
+  --data @$ARQUIVO_ENVELOPE \
+  --verbose > $cCaminho_e_File_Retorno
+
+cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-"$( date +%Y%m%d%H%M%S%N )
+
+exit
+fi
+
+
+
+
+
+
+if [ "$cComando" == "coplan_snns_nfeRecepcao" ];then
+
+
+cCaminho_e_File_Copia=$2
+cCaminho_e_File_Retorno=$3
+cCaminho_e_File_Certificado=$4
+cSenha_do_Certificado=$5
+cCaminho_da_Web_Service=$6
+
+echo "Complan Recepcao" >> /basepro/logs/FenixSnns.log
+
+
+
+
+
+
+#curl -v --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" \
+#-X POST "https://sefin.nfse.gov.br/SefinNacional/nfse" \
+#-H "Content-Type: application/json" \
+#-H "Accept: application/json" \
+#--data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno
+#
+#cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-"$( date +%Y%m%d%H%M%S%N )
+
+#curl -v --tlsv1.2 --cert "$cCaminho_e_File_Certificado.pem" -X POST "https://sefin.nfse.gov.br/SefinNacional/nfse" -H "Content-Type: application/json" -H "Accept: application/json" --data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno
+
+
+ARQUIVO_DPS=$cCaminho_e_File_Copia
+#CONTEUDO_DPS=$(cat "$ARQUIVO_DPS")
+CONTEUDO_DPS=$(sed 's/<?xml[^>]*?>//g' "$ARQUIVO_DPS")
+ARQUIVO_ENVELOPE="$ARQUIVO_DPS-envelope.xml"
+
+echo "ARQUIVO_DPS $ARQUIVO_DPS"
+echo "ARQUIVO_ENVELOPE $ARQUIVO_ENVELOPE"
+
+# Gera o arquivo pedido.xml com o envelope SOAP
+cat <<EOF > $ARQUIVO_ENVELOPE
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope
+	xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+	xmlns:trib="Tributario">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<trib:nfse_web_service.GERARNFSE>
+			<trib:Gerarnfserequest>
+				<trib:nfseCabecMsg><![CDATA[<cabecalho versao="2.04" xmlns="http://www.abrasf.org.br/nfse.xsd">
+                  <versaoDados>2.04</versaoDados>
+               </cabecalho>]]>
+				</trib:nfseCabecMsg>
+				<trib:nfseDadosMsg><![CDATA[<GerarNfseEnvio xmlns="http://www.sped.fazenda.gov.br/nfse" xmlns:dsig="http://www.w3.org/2000/09/xmldsig" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> $CONTEUDO_DPS	</GerarNfseEnvio>]]></trib:nfseDadosMsg>
+			</trib:Gerarnfserequest>
+		</trib:nfse_web_service.GERARNFSE>
+	</soapenv:Body>
+</soapenv:Envelope> 
+EOF
+
+echo "curl"
+
+echo "curl --insecure  --request POST \
+  --url https://gp.srv.br/tributario/sinop/anfse_ws \
+  --header 'Content-Type: text/xml;charset=UTF-8' \
+  --header 'SOAPAction: \"\"' \
+  --cert \"$cCaminho_e_File_Certificado.pem\"  \
+  --data @$ARQUIVO_ENVELOPE " >> /basepro/logs/FenixSnns.log
+
+curl --request POST \
+  --url https://gp.srv.br/tributario/sinop/anfse_ws \
+  --header 'Content-Type: text/xml;charset=UTF-8' \
+  --header 'SOAPAction: ""' \
+  --cert "$cCaminho_e_File_Certificado.pem"  \
+  --data @$ARQUIVO_ENVELOPE \
+  --verbose  | xmllint --xpath "//*[local-name()='outputXML']/text()" - 2>> /dev/null | sed 's/<!\[CDATA\[//g; s/\]\]>//g' \
+ > $cCaminho_e_File_Retorno 2>> /basepro/logs/FenixSnns.log
+
+cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-"$( date +%Y%m%d%H%M%S%N )
+
+exit
+fi

@@ -48,7 +48,7 @@ public class GnreResultadoLote extends ClienteServico {
             br.com.basepro.fenixsped.gnre.pe.GnreResultadoLoteStub.GnreDadosMsg dadosMsg = br.com.basepro.fenixsped.gnre.pe.GnreResultadoLoteStub.GnreDadosMsg.Factory.parse(dad);
             br.com.basepro.fenixsped.gnre.pe.GnreResultadoLoteStub.GnreCabecMsg cabecMsg = new br.com.basepro.fenixsped.gnre.pe.GnreResultadoLoteStub.GnreCabecMsg();
             //cabecMsg.setVersaoDados(getVersaoDados());
-	    cabecMsg.setVersaoDados("1.00");
+	    cabecMsg.setVersaoDados("2.00");
             //br.com.basepro.fenixsped.gnre.pe.GnreLoteRecepcaoStub.NfeCabecMsgE cabecMsgE = new br.com.basepro.fenixsped.ws.mt2.NfeRecepcao2Stub.NfeCabecMsgE();
             //cabecMsgE.setNfeCabecMsg(cabecMsg);
             br.com.basepro.fenixsped.gnre.pe.GnreResultadoLoteStub stub = new br.com.basepro.fenixsped.gnre.pe.GnreResultadoLoteStub(getCaminhoWebService());

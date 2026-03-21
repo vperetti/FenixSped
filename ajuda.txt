@@ -1,0 +1,540 @@
+
+ FenixSped
+ =========
+ Utilitario de para assinatura de documentos e comunicacao com webservers.
+
+ FenixSped <comando> <opcao1>...<opcaoN>
+
+ Comando: assinar
+ ======== =======
+ Ex.:
+ FenixSped assinar <caminhoXml> <caminhoCertificado> <senha> [caminhoXmlNovo]
+
+ onde:
+     caminhoXml = Caminho para o arquivo XML a ser assinado
+
+     caminhoCertificado = Caminho para o certificado digital a ser usado na 
+ assinatura.
+
+     senha = Senha do Certificado Digital
+
+     caminhoXmlNovo = Para preservar o arquivo original sem assinatura, 
+ informar caminho que contera copia do xml assinado
+
+
+ Comando: nfeRecepcao
+ ======== ===========
+ Ex.:
+ FenixSped nfeRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+ Comando: nfeRetRecepcao
+ ======== ==============
+ Ex.:
+ FenixSped nfeRetRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+ Comando: nfeCancelamento
+ ======== ===============
+ Ex.:
+ FenixSped nfeCancelamento <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+ Comando: nfeInutilizacao
+ ======== ===============
+ Ex.:
+ FenixSped nfeInutilizacao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+ Comando: nfeConsulta
+ ======== ===========
+ Ex.:
+ FenixSped nfeConsulta <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+ Comando: nfeStatusServico
+ ======== ================
+ Ex.:
+ FenixSped nfeStatusServico <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+ Comando: nfeEvento
+ ======== =========
+ Ex.:
+ FenixSped nfeEvento <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+ Comando: cadConsultaCadastro
+ ======== ===================
+ Ex.:
+ FenixSped cadConsultaCadastro <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+ Comando: nfeDownloadNF
+ ======== =============
+ Ex.:
+ FenixSped nfeDownloadNF <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoUF> <caminhoXMLprocNFe>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoUF = Código da Unidade da Federação do Destinatário
+
+     caminhoXMLprocNFe = Caminho onde salvar o xml já separando o procNFe contendo somente a nota fiscal
+
+
+ NFSE - NOTA FISCAL DE SERVIÇOS ELETRONICA
+ ====   ==== ====== == ======== ==========
+
+ NDSF - IMPLEMENTAÇÃO DO PADRÃO DSF www.dsfnet.com.br
+ ====   ============= == ====== === =================
+
+ Comando: ndsf_assinar
+ ======== ============
+ Ex.:
+ FenixSped ndsf_assinar <caminhoXml> <caminhoCertificado> <senha> [caminhoXmlNovo]
+
+ onde:
+     caminhoXml = Caminho para o arquivo XML a ser assinado
+
+     caminhoCertificado = Caminho para o certificado digital a ser usado na 
+ assinatura.
+
+     senha = Senha do Certificado Digital
+
+     caminhoXmlNovo = Para preservar o arquivo original sem assinatura, 
+ informar caminho que contera copia do xml assinado
+
+
+ Comando: ndsf_nfeRecepcao
+ ======== ================
+ Ex.:
+ FenixSped ndsf_nfeRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: ndsf_nfeRetRecepcao
+ ======== ===================
+ Ex.:
+ FenixSped ndsf_nfeRetRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: ndsf_nfeCancelamento
+ ======== ====================
+ Ex.:
+ FenixSped ndsf_nfeCancelamento <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: ndsf_nfeInutilizacao
+ ======== ====================
+ Ex.:
+ FenixSped ndsf_nfeInutilizacao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: ndsf_nfeConsulta
+ ======== ================
+ Ex.:
+ FenixSped ndsf_nfeConsulta <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: ndsf_nfeStatusServico
+ ======== =====================
+ Ex.:
+ FenixSped ndsf_nfeStatusServico <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: ndsf_cadConsultaCadastro
+ ======== ========================
+ Ex.:
+ FenixSped ndsf_cadConsultaCadastro <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+
+ ABRASF - IMPLEMENTAÇÃO DO PADRÃO ABRASF
+ ======   ============= == ====== ======
+
+ Comando: abrasf_assinar
+ ======== ============
+ Ex.:
+ FenixSped abrasf_assinar <caminhoXml> <caminhoCertificado> <senha> [caminhoXmlNovo]
+
+ onde:
+     caminhoXml = Caminho para o arquivo XML a ser assinado
+
+     caminhoCertificado = Caminho para o certificado digital a ser usado na 
+ assinatura.
+
+     senha = Senha do Certificado Digital
+
+     caminhoXmlNovo = Para preservar o arquivo original sem assinatura, 
+ informar caminho que contera copia do xml assinado
+
+
+ Comando: abrasf_nfeRecepcao
+ ======== ================
+ Ex.:
+ FenixSped abrasf_nfeRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: abrasf_nfeRetRecepcao
+ ======== ===================
+ Ex.:
+ FenixSped abrasf_nfeRetRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: abrasf_nfeCancelamento
+ ======== ====================
+ Ex.:
+ FenixSped abrasf_nfeCancelamento <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: abrasf_nfeInutilizacao
+ ======== ====================
+ Ex.:
+ FenixSped abrasf_nfeInutilizacao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: abrasf_nfeConsulta
+ ======== ================
+ Ex.:
+ FenixSped abrasf_nfeConsulta <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: abrasf_nfeStatusServico
+ ======== =====================
+ Ex.:
+ FenixSped abrasf_nfeStatusServico <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+ Comando: abrasf_cadConsultaCadastro
+ ======== ========================
+ Ex.:
+ FenixSped abrasf_cadConsultaCadastro <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> <codigoMunicipio>
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+     codigoMunicipio = Código do Município
+
+
+ GNRE - GUIA NACIONAL DE RECOLHIMENTO - SEFAZ-PE
+ ====   ==== ======== == ============   ========
+
+
+ Comando: GnreLoteRecepcao
+ ======== ================
+ Ex.:
+ FenixSped GnreLoteRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> 
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+
+ Comando: GnreResultadoLote
+ ======== =================
+ Ex.:
+ FenixSped GnreLoteRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> 
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+
+ Comando: GnreConfigUF
+ ======== ============
+ Ex.:
+ FenixSped GnreLoteRecepcao <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService> 
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser enviado
+
+     caminhoXMLRetorno = Caminho onde o retorno será salvo
+
+     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver
+
+     senhaCertificado = Senha do certificado
+
+     caminhoWebService = Url do serviço
+
+
+ UTILITARIOS
+ ===========
+
+
+ Comando: validar
+ ======== =======
+ Ex.:
+ FenixSped validar <caminhoXML> <caminhoXdsSchema> 
+
+ Onde: 
+     caminhoXML = Arquivo com conteudo a ser validado
+
+     caminhoXdsSchema = Caminho do Schema de validação
+
+

@@ -22,7 +22,15 @@
 package br.com.basepro.fenixsped.abrasf;
 
 import br.com.basepro.fenixsped.ws.ClienteServico;
+import static br.com.basepro.fenixsped.ws.ClienteServico.getCaminhoWebService;
+import static br.com.basepro.fenixsped.ws.ClienteServico.getConteudoXML;
+import static br.com.basepro.fenixsped.ws.ClienteServico.setRetorno;
 import java.net.URL;
+import javax.xml.namespace.QName;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axis2.client.Options;
 
 
 /**
@@ -55,8 +63,22 @@ public class NfeConsulta extends ClienteServico {
             br.com.basepro.fenixsped.abrasf.recifepe.NfseStub.ConsultarNfseRpsResposta resposta = servico.consultarNfsePorRps(envio); 
             setRetorno(resposta.getConsultarNfseRpsResposta());
 
+            
         //SE FOR CUIABA
         } else if (codigoMunicipio.equalsIgnoreCase("510340")) {
+            br.com.basepro.fenixsped.abrasf.issnetonline204.NfseWSServiceStub servico = new br.com.basepro.fenixsped.abrasf.issnetonline204.NfseWSServiceStub(getCaminhoWebService());
+            br.com.basepro.fenixsped.abrasf.issnetonline204.NfseWSServiceStub.ConsultarNfsePorRps envio = new br.com.basepro.fenixsped.abrasf.issnetonline204.NfseWSServiceStub.ConsultarNfsePorRps();
+            br.com.basepro.fenixsped.abrasf.issnetonline204.NfseWSServiceStub.Input inputReq = new br.com.basepro.fenixsped.abrasf.issnetonline204.NfseWSServiceStub.Input();
+            inputReq.setNfseCabecMsg("<cabecalho versao=\"2.04\" xmlns=\"http://www.abrasf.org.br/nfse.xsd\">\n"+
+"<versaoDados>2.04</versaoDados>\n"+
+"</cabecalho>");
+            inputReq.setNfseDadosMsg(getConteudoXML().substring(38)); 
+            
+            envio.setConsultarNfsePorRps(inputReq);
+            setRetorno(servico.consultarNfsePorRps2String(envio));
+
+        //SE FOR CUIABA
+        } else if (codigoMunicipio.equalsIgnoreCase("510340ant")) {
             setCertificaServidor(true);
             br.com.basepro.fenixsped.abrasf.issnet.ServicosStub servico = new br.com.basepro.fenixsped.abrasf.issnet.ServicosStub(getCaminhoWebService());
             br.com.basepro.fenixsped.abrasf.issnet.ServicosStub.ConsultaNFSePorRPS envio = new br.com.basepro.fenixsped.abrasf.issnet.ServicosStub.ConsultaNFSePorRPS();
@@ -64,6 +86,83 @@ public class NfeConsulta extends ClienteServico {
             br.com.basepro.fenixsped.abrasf.issnet.ServicosStub.ConsultaNFSePorRPSResponse resposta = servico.consultaNFSePorRPS(envio); 
             setRetorno(resposta.getConsultaNFSePorRPSResult());
 
+	//SE FOR DOURADOS
+        } else if (codigoMunicipio.equalsIgnoreCase("500370")) {
+            
+            setCertificaServidor(true);
+            br.com.basepro.fenixsped.abrasf.bethav1.NfseWSServiceStub servico = new br.com.basepro.fenixsped.abrasf.bethav1.NfseWSServiceStub(getCaminhoWebService());
+            br.com.basepro.fenixsped.abrasf.bethav1.NfseWSServiceStub.ConsultarNfsePorRpsE envio = new br.com.basepro.fenixsped.abrasf.bethav1.NfseWSServiceStub.ConsultarNfsePorRpsE();
+            br.com.basepro.fenixsped.abrasf.bethav1.NfseWSServiceStub.ConsultarNfsePorRps inputReq = new br.com.basepro.fenixsped.abrasf.bethav1.NfseWSServiceStub.ConsultarNfsePorRps();
+            inputReq.setNfseCabecMsg("<cabecalho xmlns=\"http://www.betha.com.br/e-nota-contribuinte-ws\" versao=\"2.02\"><versaoDados>2.02</versaoDados></cabecalho>");
+            inputReq.setNfseDadosMsg(getConteudoXML().substring(39));
+            envio.setConsultarNfsePorRps(inputReq);
+            br.com.basepro.fenixsped.abrasf.bethav1.NfseWSServiceStub.ConsultarNfsePorRpsResponseE resposta = servico.consultarNfsePorRps(envio);
+            setRetorno(resposta.getConsultarNfsePorRpsResponse().get_return());
+            
+        //SE FOR DOURADOS
+        } else if (codigoMunicipio.equalsIgnoreCase("500370ant")) {
+            setCertificaServidor(true);
+            br.com.basepro.fenixsped.abrasf.issnet.ServicosStub servico = new br.com.basepro.fenixsped.abrasf.issnet.ServicosStub(getCaminhoWebService());
+            br.com.basepro.fenixsped.abrasf.issnet.ServicosStub.ConsultaNFSePorRPS envio = new br.com.basepro.fenixsped.abrasf.issnet.ServicosStub.ConsultaNFSePorRPS();
+            envio.setXml(getConteudoXML());                   
+            br.com.basepro.fenixsped.abrasf.issnet.ServicosStub.ConsultaNFSePorRPSResponse resposta = servico.consultaNFSePorRPS(envio); 
+            setRetorno(resposta.getConsultaNFSePorRPSResult());
+
+	} else if (codigoMunicipio.equalsIgnoreCase("510790")) {
+
+            setCertificaServidor(true);
+            br.com.basepro.fenixsped.abrasf.sinop4.Nfse_web_serviceStub servico = new br.com.basepro.fenixsped.abrasf.sinop4.Nfse_web_serviceStub(getCaminhoWebService());
+            br.com.basepro.fenixsped.abrasf.sinop4.Nfse_web_serviceStub.Nfse_web_serviceCONSULTARNFSEPORRPS envio = new br.com.basepro.fenixsped.abrasf.sinop4.Nfse_web_serviceStub.Nfse_web_serviceCONSULTARNFSEPORRPS();
+            br.com.basepro.fenixsped.abrasf.sinop4.Nfse_web_serviceStub.Input inputReq = new br.com.basepro.fenixsped.abrasf.sinop4.Nfse_web_serviceStub.Input();
+            inputReq.setNfseCabecMsg("<?xml version = \"2.01\" encoding = \"utf-8\"?>    \n" +
+"            	<cabecalho\n" +
+"    				xmlns=\"http://www.abrasf.org.br/nfse.xsd\" versao=\"2.01\">\n" +
+"    				<versaoDados>2.01</versaoDados>\n" +
+"			    </cabecalho>");
+            inputReq.setNfseDadosMsg(getConteudoXML()); 
+            envio.setConsultarnfseporrpsrequest(inputReq);
+            br.com.basepro.fenixsped.abrasf.sinop4.Nfse_web_serviceStub.Nfse_web_serviceCONSULTARNFSEPORRPSResponse resposta = servico.cONSULTARNFSEPORRPS(envio);
+            setRetorno(resposta.getConsultarnfseporrpsresponse().getOutputXML());
+	}else if (codigoMunicipio.equalsIgnoreCase("291955")) {
+            // LUIZ EDUARDO MAGALHAES
+            String NFSE_CABECALHO_MSG = "<cabecalho xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns=\"http://www.abrasf.org.br/nfse.xsd\" versao=\"2.01\"><versaoDados>2.01</versaoDados></cabecalho>";
+            br.com.basepro.fenixsped.abrasf.lem.NfseStub servico = new br.com.basepro.fenixsped.abrasf.lem.NfseStub(getCaminhoWebService());
+            System.out.println("===================================================================");
+            System.out.println("Auth 6 OK");
+            System.out.println("===================================================================");
+
+            Options options = servico._getServiceClient().getOptions();
+            OMFactory omFactory = OMAbstractFactory.getOMFactory();
+           
+            OMElement omSecurityElement = omFactory.createOMElement(new QName( "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Security", "wsse"), null);
+            omSecurityElement.addAttribute("soapenv:mustUnderstand", "1", null);
+            omSecurityElement.addAttribute("xmlns:wsu", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", null);            
+            OMElement omusertoken = omFactory.createOMElement(new QName("", "wsse:UsernameToken", ""), null);
+            omusertoken.addAttribute("wsu:Id", "UsernameToken-2", null);
+            OMElement omuserName = omFactory.createOMElement(new QName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Username", "wsse"), null);
+            omuserName.setText("84704829472");
+            OMElement omPassword = omFactory.createOMElement(new QName("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "Password", "wsse"), null);
+            omPassword.addAttribute("Type",
+                "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText",null );
+            omPassword.setText("1139236008");
+            omusertoken.addChild(omuserName);
+            omusertoken.addChild(omPassword);
+            omSecurityElement.addChild(omusertoken);
+            servico._getServiceClient().addHeader(omSecurityElement);
+                        
+            //////////////////////////////////////////////////////////////////////////////////        
+            //options.setProperty(Constants.Configuration.MESSAGE_TYPE,"text/xml"); //https://stackoverflow.com/questions/14584600/issue-with-setting-the-content-type-for-http-request-header-with-axis2
+            /*
+            Your client may be using the wrong SOAP version to format its request. text/xml is the SOAP 1.1 content type. application/soap+xml is the content type for SOAP 1.2.
+            */
+            options.setSoapVersionURI(org.apache.axiom.soap.SOAP11Constants.SOAP_ENVELOPE_NAMESPACE_URI);
+            
+         
+            br.com.basepro.fenixsped.abrasf.lem.NfseStub.ConsultarNfsePorRpsRequest envio = new br.com.basepro.fenixsped.abrasf.lem.NfseStub.ConsultarNfsePorRpsRequest();
+            envio.setNfseCabecMsg(NFSE_CABECALHO_MSG);
+            envio.setNfseDadosMsg(getConteudoXML());           
+            br.com.basepro.fenixsped.abrasf.lem.NfseStub.ConsultarNfsePorRpsResponse resposta = servico.consultarNfsePorRps(envio);
+            setRetorno(resposta.getOutputXML());
 	    
         } else {
             //PARA MANTER COMPATIBILIDADE FOI MANTIDO PADRÃO SALVADOR

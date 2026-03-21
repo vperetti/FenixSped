@@ -65,6 +65,7 @@ import org.w3c.dom.NodeList;
 //import sun.misc.BASE64Encoder;
 
 import java.util.Enumeration;
+import org.w3c.dom.Node;
 
 /**
  * Classe para assinatura de notas eletrônicas de serviços padrão abrasf
@@ -110,7 +111,7 @@ public class AssinaDocumentos {
 
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(false);
+		factory.setNamespaceAware(true);
 
 		//Create a DOM XMLSignatureFactory that will be used to
 		//generate the enveloped signature.        
@@ -225,8 +226,13 @@ public class AssinaDocumentos {
 
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(false);
-		DocumentBuilder builder = factory.newDocumentBuilder();
+		if (tag.equalsIgnoreCase("tc:InfRps")){
+                    factory.setNamespaceAware(true);
+                }else{
+                    factory.setNamespaceAware(false);
+                }
+		
+                DocumentBuilder builder = factory.newDocumentBuilder();
 		Document docs = builder.parse(new File(caminhoXml));
 
 		// Busca nome do elemento raiz para verificar q tipo de documento a assinar
@@ -242,11 +248,35 @@ public class AssinaDocumentos {
 
 		System.out.println("Municipio em assinar:" + codigoMunicipio);
 
-		if (codigoMunicipio.equalsIgnoreCase("261160")) {
+		if (  ( codigoMunicipio.equalsIgnoreCase("261160"))) {
 			stringId = "Id";
 		}
 
-		System.out.println("id a assinar:" + stringId);
+                if (  ( codigoMunicipio.equalsIgnoreCase("510790"))) {
+			stringId = "Id";
+		}
+                if (  ( codigoMunicipio.equalsIgnoreCase("500370"))) {
+			stringId = "Id";
+                                                System.setProperty("org.apache.xml.security.ignoreLineBreaks", "true");
+  //                      org.apache.xml.security.Init.init();
+                        System.setProperty("com.sun.org.apache.xml.internal.security.ignoreLineBreaks", "true");
+  //                         com.sun.org.apache.xml.internal.security.Init.init();
+		}
+                
+                //Cuiaba
+                if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+			stringId = "Id";
+                        
+                        System.setProperty("org.apache.xml.security.ignoreLineBreaks", "true");
+  //                      org.apache.xml.security.Init.init();
+                        System.setProperty("com.sun.org.apache.xml.internal.security.ignoreLineBreaks", "true");
+  //                         com.sun.org.apache.xml.internal.security.Init.init();
+		}
+
+                                
+		System.out.println(" (teste 4 ) id a assinar:" + stringId);
+
+                
 
 
 		/*
@@ -265,14 +295,35 @@ public class AssinaDocumentos {
 		if (tipoDocumento.equals("CancelarNfseEnvio")) {
 			if (tag.equalsIgnoreCase("InfRps")) {
 				tag = "InfPedidoCancelamento";	
+			}if (tag.equalsIgnoreCase("Pedido")) {
+				tag = "InfPedidoCancelamento";	
 			}else {
 				tag = "";
 			}
+		}
+                if (tipoDocumento.equals("CancelarNfseEnvio")) {
+			if (tag.equalsIgnoreCase("InfRps")) {
+				tag = "InfPedidoCancelamento";	
+			}if (tag.equalsIgnoreCase("Pedido")) {
+				tag = "InfPedidoCancelamento";	
+			}else {
+				tag = "";
+			}
+                        if (codigoMunicipio.equalsIgnoreCase("510340")) {
+                            	tag = "InfPedidoCancelamento";	
+                        }
+                        if (codigoMunicipio.equalsIgnoreCase("510790")) {
+                            	tag = "InfPedidoCancelamento";	
+                        }
 		} 
+                
+                
 		if (tipoDocumento.equals("p1:CancelarNfseEnvio")) {
 			if (tag.equalsIgnoreCase("tc:InfRps")) {
 				if (codigoMunicipio.equalsIgnoreCase("510340")) {
 					tag = "tc:InfPedidoCancelamento";
+				}else if (codigoMunicipio.equalsIgnoreCase("500370")) {
+					tag = "InfPedidoCancelamento";
 				}else{
 					tag = "InfPedidoCancelamento";	
 				}
@@ -280,12 +331,33 @@ public class AssinaDocumentos {
 				tag = "";
 			}
 		}
+                
+                if (tipoDocumento.equals("ConsultarNfseRpsEnvio")) {
+			if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+				tag = "Pedido";	
+			}else {
+				tag = "";
+			}
+		} 
+/*
+                if (  ( codigoMunicipio.equalsIgnoreCase("510790"))) {
+                    if (tipoDocumento.equals("EnviarLoteRpsEnvio")) {
+                        tag = "InfDeclaracaoPrestacaoServico";
+                    }
+                    if (tipoDocumento.equals("EnviarLoteRpsSincronoEnvio")) {
+                        tag = "InfDeclaracaoPrestacaoServico";
+                    }
+                }
+                */
 		System.out.print("tag: "+tag);
 
 		//Create a DOM XMLSignatureFactory that will be used to
 		//generate the enveloped signature.        
 		String providerName = System.getProperty(PROVIDER_NAME, PROVIDER_CLASS_NAME);
-		XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());
+		
+                
+                XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());
+                ////XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 
 		// Create a Reference to the enveloped document (in this case,
 		// you are signing the whole document, so a URI of "" signifies
@@ -327,21 +399,342 @@ public class AssinaDocumentos {
 
 		// Instantiate the document to be signed.
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setNamespaceAware(true);
+		
+                if (tag.equalsIgnoreCase("tc:InfRps")){
+                    dbf.setNamespaceAware(true);
+                }else{
+                    dbf.setNamespaceAware(false);
+                }
 		//dbf.setNamespaceAware(false);
-		Document doc = dbf.newDocumentBuilder().parse(new FileInputStream(caminhoXml));
+		
+                
+                //Document doc = dbf.newDocumentBuilder().parse(new FileInputStream(caminhoXml));
 
 
 
 		//Lista cada tag a ser assinada
-		for (int i = 0; i < doc.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
+		//for (int i = 0; i < doc.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
+                for (int i = 0; i < docs.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
 
 			// Obtem elemento do documento a ser assinado, será criado uma
 			// REFERENCE para o mesmo
 			NodeList elements = docs.getElementsByTagName(tag);
 			Element el = (Element) elements.item(i);
 			String id = el.getAttribute(stringId);
-			Reference ref = fac.newReference("#" + id, fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+                        el.setIdAttribute(stringId, true);
+                        
+                        Reference ref ;
+                                
+                        //Cuiaba
+                        if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+                            ref = fac.newReference("" , fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+                        }else{
+                            ref = fac.newReference("#" + id, fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+                        }
+
+			// Create the SignedInfo.
+			SignedInfo si = fac.newSignedInfo(fac.newCanonicalizationMethod(
+				CanonicalizationMethod.INCLUSIVE,
+				(C14NMethodParameterSpec) null), fac.newSignatureMethod(SignatureMethod.RSA_SHA1, null),
+				Collections.singletonList(ref));
+
+			// Create a DOMSignContext and specify the RSA PrivateKey and
+			// location of the resulting XMLSignature's parent element.
+			//DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), doc.getDocumentElement().getElementsByTagName(tag).item(i).getParentNode());
+                        DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), docs.getDocumentElement().getElementsByTagName(tag).item(i).getParentNode());
+
+			// Create the XMLSignature, but don't sign it yet.
+			XMLSignature signature = fac.newXMLSignature(si, ki);
+
+			// Marshal, generate, and sign the enveloped signature.
+			signature.sign(dsc);
+		}
+
+
+
+
+		//doc.setXmlStandalone(true);
+                docs.setXmlStandalone(true);
+		//doc.getDocumentElement().removeAttribute("xmlns:ns2");
+                docs.getDocumentElement().removeAttribute("xmlns:ns2");
+//        if (tag.equalsIgnoreCase("infNFe")) {
+//            ((Element) doc.getDocumentElement().getElementsByTagName("NFe").item(0)).setAttribute("xmlns", "http://www.portalfiscal.inf.br/nfe");
+//            ((Element) doc.getDocumentElement().getElementsByTagName("infNFe").item(0)).setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+//        }
+
+
+		// Output the resulting document.
+		//OutputStream os = new FileOutputStream(caminhoXmlNovo);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer trans = tf.newTransformer();
+		//trans.transform(new DOMSource(doc), new StreamResult(os));
+                trans.transform(new DOMSource(docs), new StreamResult(os));
+
+		//System.out.println("===\n"+os.toString()+"\n====");
+
+
+		//novo
+		File fout = new File(caminhoXmlNovo);
+		FileOutputStream out = new FileOutputStream(fout);
+		out.write(os.toByteArray());
+
+
+
+		// Verifica as assinaturas
+		// Find Signature element.
+		//NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+                NodeList nl = docs.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+		if (nl.getLength() == 0) {
+			throw new Exception("Cannot find Signature element");
+		}
+		for (int i = 0; i < nl.getLength(); i++) {
+			// Create a DOMValidateContext and specify a KeySelector and document context.
+			DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(ks), nl.item(i));
+                        
+                        /*
+                        if ( codigoMunicipio.equalsIgnoreCase("510340")) { // CUIABA
+
+                            
+                            if (tag.equalsIgnoreCase("tc:InfRps")){
+                                
+                                //NodeList nlb = doc.getElementsByTagNameNS("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd", "InfRps");
+                                NodeList nlb = docs.getElementsByTagNameNS("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd", "InfRps");
+                                //valContext.putNamespacePrefix("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd","tc");
+                                Node body = nlb.item(0);
+                                //valContext.setIdAttributeNS((Element)body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "id");
+                                
+                                valContext.setIdAttributeNS((Element)body, null, stringId);
+
+
+                                
+                            }
+                        }*/
+                        
+			// Unmarshal the XMLSignature.
+			XMLSignature signatures = fac.unmarshalXMLSignature(valContext);
+			// Validate the XMLSignature.
+			boolean coreValidity = signatures.validate(valContext);
+			// Check core validation status.
+			if (coreValidity == false) {
+				System.err.println("Falha na Assinatura!");
+			} else {
+				System.out.println("Assinatura Correta!");
+			}
+		}
+	}
+
+        public void assinarBetha202(String caminhoXml, String caminhoCertificado, String senha, String caminhoXmlNovo, String tag, String codigoMunicipio) throws Exception {
+		//String tag = ""; ///=
+		String tipoDocumento = ""; ///=
+		String stringId = "id"; ///=
+
+
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); ///=
+                factory.setNamespaceAware(false); ///=
+                DocumentBuilder builder = factory.newDocumentBuilder(); ///=
+		Document docs = builder.parse(new File(caminhoXml)); ///=
+
+		// Busca nome do elemento raiz para verificar q tipo de documento a assinar
+		tipoDocumento = docs.getDocumentElement().getNodeName(); ///=
+
+		System.out.println("Assinar Betha 202:");
+
+		System.out.println("tipo documento:" + tipoDocumento);
+		System.out.println("caminhoXml:" + caminhoXml);
+		System.out.println("caminhoCertificado:" + caminhoCertificado);
+		System.out.println("senha:" + senha);
+		System.out.println("caminhoXmlNovo:" + caminhoXmlNovo);
+		System.out.println("tag:" + tag);
+                
+                if (tipoDocumento.equalsIgnoreCase("CancelarNfseEnvio")) {
+                        if (tag.equalsIgnoreCase("LoteRps")){
+                            System.out.println("Duplicado não assina fim" );
+                            return;
+                        }
+                }
+
+		System.out.println("Municipio em assinar:" + codigoMunicipio);
+
+		if (  ( codigoMunicipio.equalsIgnoreCase("261160"))) {
+			stringId = "Id";
+		}
+
+                if (  ( codigoMunicipio.equalsIgnoreCase("510790"))) {
+			stringId = "Id";
+		}
+                if (  ( codigoMunicipio.equalsIgnoreCase("500370"))) {
+			stringId = "Id";
+		}
+                
+                //Cuiaba
+                if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+			stringId = "Id";
+                        
+                        System.setProperty("org.apache.xml.security.ignoreLineBreaks", "true");
+  //                      org.apache.xml.security.Init.init();
+                        System.setProperty("com.sun.org.apache.xml.internal.security.ignoreLineBreaks", "true");
+  //                         com.sun.org.apache.xml.internal.security.Init.init();
+		}
+
+                                
+		System.out.println(" (teste 4 ) id a assinar:" + stringId);
+
+                
+
+
+		/*
+		if (tipoDocumento.equals("EnviarLoteRpsEnvio")) {
+		tag = "LoteRps";
+		} else if (tipoDocumento.equals("Rps")) {
+		tag = "InfRps";
+		} else if (tipoDocumento.equals("cancNFe")) {
+		tag = "infCanc";
+		} else if (tipoDocumento.equals("inutNFe")) {
+		tag = "infInut";
+		} else {
+		throw new Exception("Tipo de documento não reconhecido para assinatura.");
+		}
+                t.assinarBetha202(caminhoXml, caminhoCertificado, senha, caminhoXml + "-rpsAssinado", "InfDeclaracaoPrestacaoServico", codigoMunicipio);
+		t.assinarBetha202(caminhoXml + "-rpsAssinado", caminhoCertificado, senha, arquivoXmlNovo, "LoteRps", codigoMunicipio);
+		 */
+		if (tipoDocumento.equals("CancelarNfseEnvio")) {
+                        if (tag.equalsIgnoreCase("LoteRps")){
+                            return;
+                        }
+			if (tag.equalsIgnoreCase("InfRps")) {
+				tag = "InfPedidoCancelamento";	
+			}if (tag.equalsIgnoreCase("Pedido")) {
+				tag = "InfPedidoCancelamento";	
+			}else {
+				tag = "";
+			}
+                        tag = "tc:InfPedidoCancelamento";
+		}
+                if (tipoDocumento.equals("CancelarNfseEnvio")) {
+			if (tag.equalsIgnoreCase("InfRps")) {
+				tag = "InfPedidoCancelamento";	
+			}if (tag.equalsIgnoreCase("Pedido")) {
+				tag = "InfPedidoCancelamento";	
+			}else {
+				tag = "";
+			}
+                        if (codigoMunicipio.equalsIgnoreCase("510340")) {
+                            	tag = "InfPedidoCancelamento";	
+                        }
+                        tag = "InfPedidoCancelamento";
+		} 
+                
+                
+		if (tipoDocumento.equals("p1:CancelarNfseEnvio")) {
+			if (tag.equalsIgnoreCase("tc:InfRps")) {
+				if (codigoMunicipio.equalsIgnoreCase("510340")) {
+					tag = "tc:InfPedidoCancelamento";
+				}else if (codigoMunicipio.equalsIgnoreCase("500370")) {
+					tag = "InfPedidoCancelamento";
+				}else{
+					tag = "InfPedidoCancelamento";	
+				}
+			}else {
+				tag = "";
+			}
+		}
+                
+                if (tipoDocumento.equals("ConsultarNfseRpsEnvio")) {
+			if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+				tag = "Pedido";	
+			}else {
+				tag = "";
+			}
+		} 
+/*
+                if (  ( codigoMunicipio.equalsIgnoreCase("510790"))) {
+                    if (tipoDocumento.equals("EnviarLoteRpsEnvio")) {
+                        tag = "InfDeclaracaoPrestacaoServico";
+                    }
+                    if (tipoDocumento.equals("EnviarLoteRpsSincronoEnvio")) {
+                        tag = "InfDeclaracaoPrestacaoServico";
+                    }
+                }
+                */
+
+                
+		System.out.print("tag: "+tag);
+
+		//Create a DOM XMLSignatureFactory that will be used to
+		//generate the enveloped signature.        
+		String providerName = System.getProperty(PROVIDER_NAME, PROVIDER_CLASS_NAME);///=                
+                XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());///=
+                ////XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+
+		// Create a Reference to the enveloped document (in this case,
+		// you are signing the whole document, so a URI of "" signifies
+		// that, and also specify the SHA1 digest algorithm and
+		// the ENVELOPED Transform.
+		ArrayList transformList = new ArrayList(); ///=
+		TransformParameterSpec tps = null; ///=
+		Transform envelopedTransform = fac.newTransform(Transform.ENVELOPED, tps); ///=
+		Transform c14NTransform = fac.newTransform(C14N_TRANSFORM_METHOD, tps); ///=
+		transformList.add(envelopedTransform); ///=
+		transformList.add(c14NTransform); ///=
+
+
+
+
+		// Load the KeyStore and get the signing key and certificate.
+		KeyStore ks = KeyStore.getInstance("PKCS12"); ///=
+		ks.load(new FileInputStream(caminhoCertificado), senha.toCharArray()); ///=
+		Enumeration aliasesEnum = ks.aliases(); ///=
+		String alias = ""; ///=
+		while (aliasesEnum.hasMoreElements()) { ///=
+			alias = (String) aliasesEnum.nextElement(); ///=
+
+			if (ks.isKeyEntry(alias)) { ///=
+				break; ///=
+			} ///=
+		}
+
+		KeyStore.PrivateKeyEntry keyEntry = (KeyStore.PrivateKeyEntry) ks.getEntry(alias, new KeyStore.PasswordProtection(senha.toCharArray()));
+
+		X509Certificate cert = (X509Certificate) keyEntry.getCertificate();
+
+		// Create the KeyInfo containing the X509Data.
+		KeyInfoFactory kif = fac.getKeyInfoFactory();
+		List x509Content = new ArrayList();
+		x509Content.add(cert);
+		X509Data xd = kif.newX509Data(x509Content);
+		KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
+
+		// Instantiate the document to be signed.
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); ///=
+                System.out.println("dbf.setNamespaceAware(true);");
+		dbf.setNamespaceAware(true); ///=
+                //dbf.setNamespaceAware(false);
+		Document doc = dbf.newDocumentBuilder().parse(new FileInputStream(caminhoXml));
+
+
+
+		//Lista cada tag a ser assinada
+		for (int i = 0; i < doc.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
+                //for (int i = 0; i < docs.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
+
+			// Obtem elemento do documento a ser assinado, será criado uma
+			// REFERENCE para o mesmo
+                        NodeList elements = doc.getElementsByTagName(tag);
+			//NodeList elements = docs.getElementsByTagName(tag);
+			Element el = (Element) elements.item(i);
+			String id = el.getAttribute(stringId);
+                        el.setIdAttribute(stringId, true);
+                        
+                        Reference ref ;
+                                
+                        //Cuiaba
+                        if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+                            ref = fac.newReference("" , fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+                        }else{
+                            ref = fac.newReference("#" + id, fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+                        }
 
 			// Create the SignedInfo.
 			SignedInfo si = fac.newSignedInfo(fac.newCanonicalizationMethod(
@@ -352,6 +745,7 @@ public class AssinaDocumentos {
 			// Create a DOMSignContext and specify the RSA PrivateKey and
 			// location of the resulting XMLSignature's parent element.
 			DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), doc.getDocumentElement().getElementsByTagName(tag).item(i).getParentNode());
+                        //DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), docs.getDocumentElement().getElementsByTagName(tag).item(i).getParentNode());
 
 			// Create the XMLSignature, but don't sign it yet.
 			XMLSignature signature = fac.newXMLSignature(si, ki);
@@ -364,7 +758,9 @@ public class AssinaDocumentos {
 
 
 		doc.setXmlStandalone(true);
+                ///docs.setXmlStandalone(true);
 		doc.getDocumentElement().removeAttribute("xmlns:ns2");
+                ///docs.getDocumentElement().removeAttribute("xmlns:ns2");
 //        if (tag.equalsIgnoreCase("infNFe")) {
 //            ((Element) doc.getDocumentElement().getElementsByTagName("NFe").item(0)).setAttribute("xmlns", "http://www.portalfiscal.inf.br/nfe");
 //            ((Element) doc.getDocumentElement().getElementsByTagName("infNFe").item(0)).setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -378,6 +774,7 @@ public class AssinaDocumentos {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer trans = tf.newTransformer();
 		trans.transform(new DOMSource(doc), new StreamResult(os));
+                ///trans.transform(new DOMSource(docs), new StreamResult(os));
 
 		//System.out.println("===\n"+os.toString()+"\n====");
 
@@ -392,12 +789,33 @@ public class AssinaDocumentos {
 		// Verifica as assinaturas
 		// Find Signature element.
 		NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+                //NodeList nl = docs.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 		if (nl.getLength() == 0) {
 			throw new Exception("Cannot find Signature element");
 		}
 		for (int i = 0; i < nl.getLength(); i++) {
 			// Create a DOMValidateContext and specify a KeySelector and document context.
 			DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(ks), nl.item(i));
+                        
+                        /*
+                        if ( codigoMunicipio.equalsIgnoreCase("510340")) { // CUIABA
+
+                            
+                            if (tag.equalsIgnoreCase("tc:InfRps")){
+                                
+                                //NodeList nlb = doc.getElementsByTagNameNS("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd", "InfRps");
+                                NodeList nlb = docs.getElementsByTagNameNS("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd", "InfRps");
+                                //valContext.putNamespacePrefix("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd","tc");
+                                Node body = nlb.item(0);
+                                //valContext.setIdAttributeNS((Element)body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "id");
+                                
+                                valContext.setIdAttributeNS((Element)body, null, stringId);
+
+
+                                
+                            }
+                        }*/
+                        
 			// Unmarshal the XMLSignature.
 			XMLSignature signatures = fac.unmarshalXMLSignature(valContext);
 			// Validate the XMLSignature.
@@ -411,37 +829,136 @@ public class AssinaDocumentos {
 		}
 	}
 
-	public void assinar_f(String caminhoXml, String caminhoCertificado, String senha, String caminhoXmlNovo) throws Exception {
-		String tag = "";
+        public void assinarSemID(String caminhoXml, String caminhoCertificado, String senha, String caminhoXmlNovo, String tag, String codigoMunicipio) throws Exception {
+		//String tag = "";
 		String tipoDocumento = "";
+		String stringId = "id";
+
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setNamespaceAware(false);
-		DocumentBuilder builder = factory.newDocumentBuilder();
+		if (tag.equalsIgnoreCase("tc:InfRps")){
+                    factory.setNamespaceAware(true);
+                }else{
+                    factory.setNamespaceAware(false);
+                }
+		
+                DocumentBuilder builder = factory.newDocumentBuilder();
 		Document docs = builder.parse(new File(caminhoXml));
 
 		// Busca nome do elemento raiz para verificar q tipo de documento a assinar
 		tipoDocumento = docs.getDocumentElement().getNodeName();
 
 
-		if (tipoDocumento.equals("EnviarLoteRpsEnvio")) {
-			tag = "InfRps";
-		} else if (tipoDocumento.equals("Rps")) {
-			tag = "InfRps";
-		} else if (tipoDocumento.equals("cancNFe")) {
-			tag = "infCanc";
-		} else if (tipoDocumento.equals("inutNFe")) {
-			tag = "infInut";
-		} else {
-			throw new Exception("Tipo de documento não reconhecido para assinatura.");
+		System.out.println("tipo documento:" + tipoDocumento);
+		System.out.println("caminhoXml:" + caminhoXml);
+		System.out.println("caminhoCertificado:" + caminhoCertificado);
+		System.out.println("senha:" + senha);
+		System.out.println("caminhoXmlNovo:" + caminhoXmlNovo);
+		System.out.println("tag:" + tag);
+
+		System.out.println("Municipio em assinar:" + codigoMunicipio);
+
+		if (  ( codigoMunicipio.equalsIgnoreCase("261160"))) {
+			stringId = "Id";
 		}
 
+                if (  ( codigoMunicipio.equalsIgnoreCase("510790"))) {
+			stringId = "Id";
+		}
+                
+                //Cuiaba
+                if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+			stringId = "Id";
+                        
+                        System.setProperty("org.apache.xml.security.ignoreLineBreaks", "true");
+  //                      org.apache.xml.security.Init.init();
+                        System.setProperty("com.sun.org.apache.xml.internal.security.ignoreLineBreaks", "true");
+  //                         com.sun.org.apache.xml.internal.security.Init.init();
+		}
 
+                                
+		//System.out.println(" (teste 4 ) id a assinar:" + stringId);
+                System.out.println(" (teste 4 ) sem id a assinar");
+
+                
+
+
+		/*
+		if (tipoDocumento.equals("EnviarLoteRpsEnvio")) {
+		tag = "LoteRps";
+		} else if (tipoDocumento.equals("Rps")) {
+		tag = "InfRps";
+		} else if (tipoDocumento.equals("cancNFe")) {
+		tag = "infCanc";
+		} else if (tipoDocumento.equals("inutNFe")) {
+		tag = "infInut";
+		} else {
+		throw new Exception("Tipo de documento não reconhecido para assinatura.");
+		}
+		 */
+		if (tipoDocumento.equals("CancelarNfseEnvio")) {
+			if (tag.equalsIgnoreCase("InfRps")) {
+				tag = "InfPedidoCancelamento";	
+			}if (tag.equalsIgnoreCase("Pedido")) {
+				tag = "InfPedidoCancelamento";	
+			}else {
+				tag = "";
+			}
+		}
+                if (tipoDocumento.equals("CancelarNfseEnvio")) {
+			if (tag.equalsIgnoreCase("InfRps")) {
+				tag = "InfPedidoCancelamento";	
+			}if (tag.equalsIgnoreCase("Pedido")) {
+				tag = "InfPedidoCancelamento";	
+			}else {
+				tag = "";
+			}
+                        if (codigoMunicipio.equalsIgnoreCase("510340")) {
+                            	tag = "InfPedidoCancelamento";	
+                        }
+		} 
+                
+                
+		if (tipoDocumento.equals("p1:CancelarNfseEnvio")) {
+			if (tag.equalsIgnoreCase("tc:InfRps")) {
+				if (codigoMunicipio.equalsIgnoreCase("510340")) {
+					tag = "tc:InfPedidoCancelamento";
+				}else if (codigoMunicipio.equalsIgnoreCase("500370")) {
+					tag = "InfPedidoCancelamento";
+				}else{
+					tag = "InfPedidoCancelamento";	
+				}
+			}else {
+				tag = "";
+			}
+		}
+                
+                if (tipoDocumento.equals("ConsultarNfseRpsEnvio")) {
+			if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+				tag = "Pedido";	
+			}else {
+				tag = "";
+			}
+		} 
+/*
+                if (  ( codigoMunicipio.equalsIgnoreCase("510790"))) {
+                    if (tipoDocumento.equals("EnviarLoteRpsEnvio")) {
+                        tag = "InfDeclaracaoPrestacaoServico";
+                    }
+                    if (tipoDocumento.equals("EnviarLoteRpsSincronoEnvio")) {
+                        tag = "InfDeclaracaoPrestacaoServico";
+                    }
+                }
+                */
+		System.out.print("tag: "+tag);
 
 		//Create a DOM XMLSignatureFactory that will be used to
 		//generate the enveloped signature.        
 		String providerName = System.getProperty(PROVIDER_NAME, PROVIDER_CLASS_NAME);
-		XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());
+		
+                
+                XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());
+                ////XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 
 		// Create a Reference to the enveloped document (in this case,
 		// you are signing the whole document, so a URI of "" signifies
@@ -452,7 +969,7 @@ public class AssinaDocumentos {
 		Transform envelopedTransform = fac.newTransform(Transform.ENVELOPED, tps);
 		Transform c14NTransform = fac.newTransform(C14N_TRANSFORM_METHOD, tps);
 		transformList.add(envelopedTransform);
-		transformList.add(c14NTransform);
+		//transformList.add(c14NTransform);
 
 
 
@@ -483,20 +1000,38 @@ public class AssinaDocumentos {
 
 		// Instantiate the document to be signed.
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setNamespaceAware(true);
-		Document doc = dbf.newDocumentBuilder().parse(new FileInputStream(caminhoXml));
+		
+                if (tag.equalsIgnoreCase("tc:InfRps")){
+                    dbf.setNamespaceAware(true);
+                }else{
+                    dbf.setNamespaceAware(false);
+                }
+		//dbf.setNamespaceAware(false);
+		
+                
+                //Document doc = dbf.newDocumentBuilder().parse(new FileInputStream(caminhoXml));
 
-		doc.setXmlStandalone(true);
+
 
 		//Lista cada tag a ser assinada
-		for (int i = 0; i < doc.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
+		//for (int i = 0; i < doc.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
+                for (int i = 0; i < docs.getDocumentElement().getElementsByTagName(tag).getLength(); i++) {
 
 			// Obtem elemento do documento a ser assinado, será criado uma
 			// REFERENCE para o mesmo
 			NodeList elements = docs.getElementsByTagName(tag);
 			Element el = (Element) elements.item(i);
-			String id = el.getAttribute("id");
-			Reference ref = fac.newReference("#" + id, fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+			//String id = el.getAttribute(stringId);
+                        //el.setIdAttribute(stringId, true);
+                        
+                        Reference ref ;
+                                
+                        //Cuiaba
+                        //if (  ( codigoMunicipio.equalsIgnoreCase("510340"))) {
+                            ref = fac.newReference("" , fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+                        //}else{
+//                            ref = fac.newReference("#" + id, fac.newDigestMethod(DigestMethod.SHA1, null), transformList, null, null);
+  //                      }
 
 			// Create the SignedInfo.
 			SignedInfo si = fac.newSignedInfo(fac.newCanonicalizationMethod(
@@ -506,30 +1041,78 @@ public class AssinaDocumentos {
 
 			// Create a DOMSignContext and specify the RSA PrivateKey and
 			// location of the resulting XMLSignature's parent element.
-			DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), doc.getDocumentElement().getElementsByTagName(tag).item(i).getParentNode());
+			//DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), doc.getDocumentElement().getElementsByTagName(tag).item(i).getParentNode());
+                        DOMSignContext dsc = new DOMSignContext(keyEntry.getPrivateKey(), docs.getDocumentElement().getElementsByTagName(tag).item(i).getParentNode());
 
 			// Create the XMLSignature, but don't sign it yet.
 			XMLSignature signature = fac.newXMLSignature(si, ki);
 
 			// Marshal, generate, and sign the enveloped signature.
-			////signature.sign(dsc);
+			signature.sign(dsc);
 		}
 
+
+
+
+		//doc.setXmlStandalone(true);
+                docs.setXmlStandalone(true);
+		//doc.getDocumentElement().removeAttribute("xmlns:ns2");
+                docs.getDocumentElement().removeAttribute("xmlns:ns2");
+//        if (tag.equalsIgnoreCase("infNFe")) {
+//            ((Element) doc.getDocumentElement().getElementsByTagName("NFe").item(0)).setAttribute("xmlns", "http://www.portalfiscal.inf.br/nfe");
+//            ((Element) doc.getDocumentElement().getElementsByTagName("infNFe").item(0)).setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+//        }
+
+
 		// Output the resulting document.
-		OutputStream os = new FileOutputStream(caminhoXmlNovo);
+		//OutputStream os = new FileOutputStream(caminhoXmlNovo);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer trans = tf.newTransformer();
-		trans.transform(new DOMSource(doc), new StreamResult(os));
+		//trans.transform(new DOMSource(doc), new StreamResult(os));
+                trans.transform(new DOMSource(docs), new StreamResult(os));
+
+		//System.out.println("===\n"+os.toString()+"\n====");
+
+
+		//novo
+		File fout = new File(caminhoXmlNovo);
+		FileOutputStream out = new FileOutputStream(fout);
+		out.write(os.toByteArray());
+
+
 
 		// Verifica as assinaturas
 		// Find Signature element.
-		NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+		//NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+                NodeList nl = docs.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 		if (nl.getLength() == 0) {
 			throw new Exception("Cannot find Signature element");
 		}
 		for (int i = 0; i < nl.getLength(); i++) {
 			// Create a DOMValidateContext and specify a KeySelector and document context.
 			DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(ks), nl.item(i));
+                        
+                        /*
+                        if ( codigoMunicipio.equalsIgnoreCase("510340")) { // CUIABA
+
+                            
+                            if (tag.equalsIgnoreCase("tc:InfRps")){
+                                
+                                //NodeList nlb = doc.getElementsByTagNameNS("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd", "InfRps");
+                                NodeList nlb = docs.getElementsByTagNameNS("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd", "InfRps");
+                                //valContext.putNamespacePrefix("http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd","tc");
+                                Node body = nlb.item(0);
+                                //valContext.setIdAttributeNS((Element)body, "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd", "id");
+                                
+                                valContext.setIdAttributeNS((Element)body, null, stringId);
+
+
+                                
+                            }
+                        }*/
+                        
 			// Unmarshal the XMLSignature.
 			XMLSignature signatures = fac.unmarshalXMLSignature(valContext);
 			// Validate the XMLSignature.
@@ -542,133 +1125,17 @@ public class AssinaDocumentos {
 			}
 		}
 	}
-	/*
-	public static void main(String[] args) throws Exception {
-	
-	if (args.length < 3) {
-	System.out.println("Argumentos:\n\n comando <arquivoXmlOrigem> <arquivoCertificado> <senha> [arquivoXmlDestino]");
-	return;
-	}
-	String caminhoXml = args[0];
-	String caminhoCertificado = args[1];
-	String senha = args[2];
-	String arquivoXmlNovo = args[0];
-	if (args.length == 4) {
-	arquivoXmlNovo = args[3];
-	}
-	
-	
-	File file = new File(caminhoXml);
-	if (!file.exists()) {
-	System.out.println("Arquivo " + caminhoXml + " não encontrado!");
-	return;
-	}
-	file = new File(caminhoCertificado);
-	if (!file.exists()) {
-	System.out.println("Arquivo " + caminhoCertificado + " não encontrado!");
-	return;
-	}
-	try {
-	AssinaDocumentos t = new AssinaDocumentos();
-	if (isLote(caminhoXml)){
-	String caminhoXmlNFe = caminhoXml+"-nfe.xml";
-	StringBuffer bufferLoteCab = new StringBuffer();  
-	StringBuffer bufferLoteRod = new StringBuffer();  
-	StringBuffer bufferNFe = new StringBuffer();
-	StringBuffer bufferLoteAss = new StringBuffer();
-	
-	
-	
-	//separa nfe em caminhoXmlNFe
-	BufferedReader reader = new BufferedReader(new FileReader(caminhoXml));  
-	
-	bufferNFe.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-	
-	String line = reader.readLine();  
-	int nLinha = 1;
-	while (line!=null) {  
-	if (nLinha <= 8){
-	bufferLoteCab.append(line);  
-	//bufferLoteCab.append('\n');  
-	}else{
-	if (line.equalsIgnoreCase("</ListaRps>") ){
-	bufferLoteRod.append(line);
-	}else if (line.equalsIgnoreCase("</LoteRps>") ){
-	bufferLoteRod.append(line);
-	}else if (line.equalsIgnoreCase("</EnviarLoteRpsEnvio>") ){
-	bufferLoteRod.append(line);
-	}else{
-	bufferNFe.append(line);
-	}
-	}
-	nLinha++;
-	line = reader.readLine();  
-	}  
-	
-	FileWriter fw = new FileWriter(caminhoXmlNFe);  
-	fw.write(bufferNFe.substring(0));  
-	fw.close();
-	
-	t.assinar(caminhoXmlNFe, caminhoCertificado, senha, caminhoXmlNFe+"-assinado");    
-	
-	
-	
-	//monta arquivo lote no arquivoXmlNovo
-	bufferLoteAss.append(bufferLoteCab);
-	BufferedReader readerAss = new BufferedReader(new FileReader(caminhoXmlNFe+"-assinado"));  
-	
-	String lineAss = readerAss.readLine();  
-	
-	int nLinhaAss = 1;
-	while (lineAss!=null) {  
-	if (nLinhaAss == 1){
-	bufferLoteAss.append(lineAss.substring(38));  
-	bufferLoteAss.append('\n');  
-	}else{
-	bufferLoteAss.append(lineAss); 
-	bufferLoteAss.append('\n');  
-	}
-	nLinhaAss++;
-	lineAss = readerAss.readLine();  
-	}  
-	bufferLoteAss.append(bufferLoteRod);
-	
-	
-	FileWriter fwAss = new FileWriter(arquivoXmlNovo);  
-	fwAss.write(bufferLoteAss.substring(0));  
-	fwAss.close();                
-	
-	
-	
-	
-	
-	
-	
-	t.assinar(arquivoXmlNovo, caminhoCertificado, senha, arquivoXmlNovo);
-	
-	
-	
-	
-	
-	}else{
-	t.assinar(caminhoXml, caminhoCertificado, senha, arquivoXmlNovo);
-	}
-	
-	
-	
-	
-	System.out.println("Arquivo xml assinado com sucesso " + caminhoXml + "!");
-	} catch (Exception e) {
-	System.out.println("Erro ao tentar assinar arquivo xml! \n\n" );
-	e.printStackTrace();
-	}
-	}
-	
-	
-	 *
-	 */
 
 	public static void main(String[] args) throws Exception {
+            
+            
+            
+            	String tipoDocumento = "";
+
+
+
+
+
 
 		if (args.length < 3) {
 			System.out.println("Argumentos:\n\n comando <arquivoXmlOrigem> <arquivoCertificado> <senha> [arquivoXmlDestino]");
@@ -679,6 +1146,13 @@ public class AssinaDocumentos {
 		String senha = args[2];
 		String arquivoXmlNovo = args[3];
 		String codigoMunicipio = args[4];
+                
+                
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document docs = builder.parse(new File(caminhoXml));
+                // Busca nome do elemento raiz para verificar q tipo de documento a assinar
+		tipoDocumento = docs.getDocumentElement().getNodeName();
 
 		System.out.println("Municipio" + codigoMunicipio);
 
@@ -694,94 +1168,28 @@ public class AssinaDocumentos {
 		}
 		try {
 			AssinaDocumentos t = new AssinaDocumentos();
-			/*
-			if (isLote(caminhoXml)){
-			String caminhoXmlNFe = caminhoXml+"-nfe.xml";
-			StringBuffer bufferLoteCab = new StringBuffer();
-			StringBuffer bufferLoteRod = new StringBuffer();
-			StringBuffer bufferNFe = new StringBuffer();
-			StringBuffer bufferLoteAss = new StringBuffer();
 			
-			
-			
-			//separa nfe em caminhoXmlNFe
-			BufferedReader reader = new BufferedReader(new FileReader(caminhoXml));
-			
-			bufferNFe.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-			
-			String line = reader.readLine();
-			int nLinha = 1;
-			while (line!=null) {
-			if (nLinha <= 8){
-			bufferLoteCab.append(line);
-			//bufferLoteCab.append('\n');
-			}else{
-			if (line.equalsIgnoreCase("</ListaRps>") ){
-			bufferLoteRod.append(line);
-			}else if (line.equalsIgnoreCase("</LoteRps>") ){
-			bufferLoteRod.append(line);
-			}else if (line.equalsIgnoreCase("</EnviarLoteRpsEnvio>") ){
-			bufferLoteRod.append(line);
-			}else{
-			bufferNFe.append(line);
-			}
-			}
-			nLinha++;
-			line = reader.readLine();
-			}
-			
-			FileWriter fw = new FileWriter(caminhoXmlNFe);
-			fw.write(bufferNFe.substring(0));
-			fw.close();
-			
-			//              t.assinar(caminhoXmlNFe, caminhoCertificado, senha, caminhoXmlNFe+"-assinado");
-			
-			
-			
-			//monta arquivo lote no arquivoXmlNovo
-			bufferLoteAss.append(bufferLoteCab);
-			BufferedReader readerAss = new BufferedReader(new FileReader(caminhoXmlNFe+"-assinado"));
-			
-			String lineAss = readerAss.readLine();
-			
-			int nLinhaAss = 1;
-			while (lineAss!=null) {
-			if (nLinhaAss == 1){
-			bufferLoteAss.append(lineAss.substring(38));
-			bufferLoteAss.append('\n');
-			}else{
-			bufferLoteAss.append(lineAss);
-			bufferLoteAss.append('\n');
-			}
-			nLinhaAss++;
-			lineAss = readerAss.readLine();
-			}
-			bufferLoteAss.append(bufferLoteRod);
-			
-			
-			FileWriter fwAss = new FileWriter(arquivoXmlNovo);
-			fwAss.write(bufferLoteAss.substring(0));
-			fwAss.close();
-			
-			
-			
-			
-			
-			
-			
-			//                t.assinar(arquivoXmlNovo, caminhoCertificado, senha, arquivoXmlNovo);
-			
-			
-			
-			
-			
-			}else{
-			//              t.assinar(caminhoXml, caminhoCertificado, senha, arquivoXmlNovo);
-			}
-			
-			 */
 			if (codigoMunicipio.equalsIgnoreCase("510340")) {
-				t.assinar(caminhoXml, caminhoCertificado, senha, caminhoXml + "-rpsAssinado", "tc:InfRps", codigoMunicipio);
+                            if (tipoDocumento.equals("ConsultarNfseRpsEnvio")){
+                                t.assinarSemID(caminhoXml, caminhoCertificado, senha, caminhoXml, "InfDeclaracaoPrestacaoServico", codigoMunicipio);
+                            }else if (tipoDocumento.equals("CancelarNfseEnvio")) {
+                                t.assinar(caminhoXml, caminhoCertificado, senha, arquivoXmlNovo, "InfDeclaracaoPrestacaoServico", codigoMunicipio);
+                            }else{
+                                t.assinar(caminhoXml, caminhoCertificado, senha, caminhoXml + "-rpsAssinado", "InfDeclaracaoPrestacaoServico", codigoMunicipio);
+				t.assinar(caminhoXml + "-rpsAssinado", caminhoCertificado, senha, arquivoXmlNovo, "LoteRps", codigoMunicipio);
+                            }
+
+			} else if (codigoMunicipio.equalsIgnoreCase("500370")) {
+                            
+                                if (tipoDocumento.equalsIgnoreCase("CancelarNfseEnvio")) {
+                                    t.assinarBetha202(caminhoXml, caminhoCertificado, senha, arquivoXmlNovo, "InfDeclaracaoPrestacaoServico", codigoMunicipio);
+                                }else{
+                                    t.assinarBetha202(caminhoXml, caminhoCertificado, senha, caminhoXml + "-rpsAssinado", "InfDeclaracaoPrestacaoServico", codigoMunicipio);
+                                    t.assinarBetha202(caminhoXml + "-rpsAssinado", caminhoCertificado, senha, arquivoXmlNovo, "LoteRps", codigoMunicipio);
+                                }
+
+			} else if (codigoMunicipio.equalsIgnoreCase("510790")) { //SINOP
+				t.assinar(caminhoXml, caminhoCertificado, senha, caminhoXml + "-rpsAssinado", "InfDeclaracaoPrestacaoServico", codigoMunicipio);
 				t.assinar(caminhoXml + "-rpsAssinado", caminhoCertificado, senha, arquivoXmlNovo, "LoteRps", codigoMunicipio);
 
 			} else {

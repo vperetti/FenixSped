@@ -47,7 +47,7 @@ public class GnreLoteRecepcao extends ClienteServico {
             XMLStreamReader dad = xmlInputFactory.createXMLStreamReader(new StringReader("<nfeDadosMsg>" + getConteudoXML().substring(38) + "</nfeDadosMsg>"));
             br.com.basepro.fenixsped.gnre.pe.GnreLoteRecepcaoStub.GnreDadosMsg dadosMsg = br.com.basepro.fenixsped.gnre.pe.GnreLoteRecepcaoStub.GnreDadosMsg.Factory.parse(dad);
             br.com.basepro.fenixsped.gnre.pe.GnreLoteRecepcaoStub.GnreCabecMsg cabecMsg = new br.com.basepro.fenixsped.gnre.pe.GnreLoteRecepcaoStub.GnreCabecMsg();
-            cabecMsg.setVersaoDados("1.00");
+            cabecMsg.setVersaoDados("2.00");
             //br.com.basepro.fenixsped.gnre.pe.GnreLoteRecepcaoStub.NfeCabecMsgE cabecMsgE = new br.com.basepro.fenixsped.ws.mt2.NfeRecepcao2Stub.NfeCabecMsgE();
             //cabecMsgE.setNfeCabecMsg(cabecMsg);
             br.com.basepro.fenixsped.gnre.pe.GnreLoteRecepcaoStub stub = new br.com.basepro.fenixsped.gnre.pe.GnreLoteRecepcaoStub(getCaminhoWebService());

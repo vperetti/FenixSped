@@ -1,5 +1,5 @@
 #!/bin/bash
-tpEvento=210200
+tpEvento=210210
 #Código do evento:
 #210200 – Confirmação da Operação
 #210210 – Ciência da Operação

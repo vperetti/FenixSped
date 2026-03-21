@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="https://homologa-demo.saatri.com.br/servicos/nfse.svc?wsdl" uri="wsdl/homologa-demo.saatri.com.br/servicos/nfse.svc.wsdl"/>
+    <system systemId="https://homologa-demo.saatri.com.br/servicos/nfse.svc?wsdl=wsdl0" uri="wsdl/homologa-demo.saatri.com.br/servicos/nfse.svc.wsdl_wsdl0.wsdl"/>
+    <system systemId="https://homologa-demo.saatri.com.br/servicos/nfse.svc?xsd=xsd0" uri="wsdl/homologa-demo.saatri.com.br/servicos/nfse.svc.xsd_xsd0.xsd"/>
+</catalog>

@@ -27,7 +27,6 @@ import br.com.basepro.fenixsped.assinaturaXml.AssinaDocumentos;
 import br.com.basepro.fenixsped.util.TrataArquivos;
 import br.com.basepro.fenixsped.ws.CadConsultaCadastro;
 import br.com.basepro.fenixsped.ws.NfeCancelamento;
-import br.com.basepro.fenixsped.ws.NfeCancelamento2;
 import br.com.basepro.fenixsped.ws.NfeConsulta;
 import br.com.basepro.fenixsped.ws.NfeConsulta2;
 import br.com.basepro.fenixsped.ws.NfeInutilizacao;
@@ -39,10 +38,19 @@ import br.com.basepro.fenixsped.ws.NfeRetRecepcao2;
 import br.com.basepro.fenixsped.ws.NfeStatusServico;
 import br.com.basepro.fenixsped.ws.NfeStatusServico2;
 import br.com.basepro.fenixsped.util.XsdSchemaValidator;
+import br.com.basepro.fenixsped.ws.NfeConsulta4;
 import br.com.basepro.fenixsped.ws.RecepcaoEvento;
 import br.com.basepro.fenixsped.ws.NfeDownloadNF;
 import br.com.basepro.fenixsped.ws.NfeRecepcao3;
 import br.com.basepro.fenixsped.ws.NfeRetRecepcao3;
+import br.com.basepro.fenixsped.ws.NfeConsultaDest;
+import br.com.basepro.fenixsped.ws.NfeDistribuicaoDfe;
+import br.com.basepro.fenixsped.ws.NfeInutilizacao4;
+import br.com.basepro.fenixsped.ws.NfeRecepcao4;
+import br.com.basepro.fenixsped.ws.NfeRetRecepcao4;
+import br.com.basepro.fenixsped.ws.NfeStatusServico4;
+import br.com.basepro.fenixsped.ws.RecepcaoEvento4;
+
 
 /**
  *
@@ -190,6 +198,38 @@ public class Main {
             "\n ======== ===================" +
             "\n Ex.:" +
             "\n FenixSped cadConsultaCadastro <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>" +
+            "\n" +
+            "\n Onde: " +
+            "\n     caminhoXML = Arquivo com conteudo a ser enviado" +
+            "\n" +
+            "\n     caminhoXMLRetorno = Caminho onde o retorno será salvo" +
+            "\n" +
+            "\n     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver" +
+            "\n" +
+            "\n     senhaCertificado = Senha do certificado" +
+            "\n" +
+            "\n     caminhoWebService = Url do serviço" +
+            "\n" +
+            "\n Comando: nfeConsultaDest" +
+            "\n ======== ===============" +
+            "\n Ex.:" +
+            "\n FenixSped nfeConsultaDest <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>" +
+            "\n" +
+            "\n Onde: " +
+            "\n     caminhoXML = Arquivo com conteudo a ser enviado" +
+            "\n" +
+            "\n     caminhoXMLRetorno = Caminho onde o retorno será salvo" +
+            "\n" +
+            "\n     caminhoCertificado = Caminho do certificado para autenticar acesso ao webserver" +
+            "\n" +
+            "\n     senhaCertificado = Senha do certificado" +
+            "\n" +
+            "\n     caminhoWebService = Url do serviço" +
+            "\n" +
+	    "\n Comando: nfeDistribuicaoDfe" +
+            "\n ======== ==================" +
+            "\n Ex.:" +
+            "\n FenixSped nfeDistribuicaoDfe <caminhoXML> <caminhoXMLRetorno> <caminhoCertificado> <senhaCertificado> <caminhoWebService>" +
             "\n" +
             "\n Onde: " +
             "\n     caminhoXML = Arquivo com conteudo a ser enviado" +
@@ -607,6 +647,8 @@ public class Main {
                  ((!args[0].equalsIgnoreCase("ndsf_assinar"))&&(args.length < 6))
                  &&
                  ((!args[0].equalsIgnoreCase("abrasf_assinar"))&&(args.length < 6))
+                &&
+                 ((!args[0].equalsIgnoreCase("snns_assinar"))&&(args.length < 6))
                 )
            )
         {
@@ -654,6 +696,16 @@ public class Main {
                 System.exit(1);
             }
         }
+        
+        if (args[0].equalsIgnoreCase("snns_assinar")) {
+            try {
+                br.com.basepro.fenixsped.snns.AssinaDocumentos1.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            } catch (Exception ex) {
+                System.out.println("Erro assinando documento");
+		ex.printStackTrace();
+                System.exit(1);
+            }
+        }
 	
 	if (args[0].equalsIgnoreCase("validar")) {
             try {
@@ -674,8 +726,11 @@ public class Main {
             if (args[0].equalsIgnoreCase("nfeRecepcao20")) {
                 NfeRecepcao2.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
-	    if (args[0].equalsIgnoreCase("nfeRecepcao")) {
+	    if (args[0].equalsIgnoreCase("nfeRecepcao31")) {
                 NfeRecepcao3.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+	    if (args[0].equalsIgnoreCase("nfeRecepcao")) {
+                NfeRecepcao4.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
             if (args[0].equalsIgnoreCase("nfeRetRecepcao11")) {
                 NfeRetRecepcao.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
@@ -684,40 +739,80 @@ public class Main {
                 TrataArquivos.tiraFormatacao(args[1]);
                 NfeRetRecepcao2.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
-            if (args[0].equalsIgnoreCase("nfeRetRecepcao")) {
+            if (args[0].equalsIgnoreCase("nfeRetRecepcao31")) {
                 TrataArquivos.tiraFormatacao(args[1]);
                 NfeRetRecepcao3.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+            if (args[0].equalsIgnoreCase("nfeRetRecepcao")) {
+                TrataArquivos.tiraFormatacao(args[1]);
+                NfeRetRecepcao4.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
             if (args[0].equalsIgnoreCase("nfeCancelamento11")) {
                 NfeCancelamento.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
-            if (args[0].equalsIgnoreCase("nfeCancelamento")) {
+            if (args[0].equalsIgnoreCase("nfeCancelamento1")) {
 		TrataArquivos.tiraFormatacao(args[1]);
                 RecepcaoEvento.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+            if (args[0].equalsIgnoreCase("nfeCancelamento")) {
+		TrataArquivos.tiraFormatacao(args[1]);
+                RecepcaoEvento4.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
             if (args[0].equalsIgnoreCase("nfeInutilizacao11")) {
                 NfeInutilizacao.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
-            if (args[0].equalsIgnoreCase("nfeInutilizacao")) {
+            
+            
+            if (args[0].equalsIgnoreCase("nfeInutilizacao2")) {
                 NfeInutilizacao2.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
+            
+            if (args[0].equalsIgnoreCase("nfeInutilizacao")) {
+                NfeInutilizacao4.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+            
+            
             if (args[0].equalsIgnoreCase("nfeConsulta11")) {
                 NfeConsulta.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
-            if (args[0].equalsIgnoreCase("nfeConsulta")) {
+            if (args[0].equalsIgnoreCase("nfeConsulta2")) {
                 TrataArquivos.tiraFormatacao(args[1]);
                 NfeConsulta2.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+            if (args[0].equalsIgnoreCase("nfeConsulta")) {
+                TrataArquivos.tiraFormatacao(args[1]);
+                NfeConsulta4.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
             if (args[0].equalsIgnoreCase("nfeStatusServico11")) {
                 NfeStatusServico.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
-            if (args[0].equalsIgnoreCase("nfeStatusServico")) {
+            if (args[0].equalsIgnoreCase("nfeStatusServico20")) {
                 TrataArquivos.tiraFormatacao(args[1]);
                 NfeStatusServico2.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
-	    if (args[0].equalsIgnoreCase("nfeEvento")) {
+            if (args[0].equalsIgnoreCase("nfeStatusServico31")) {
+                TrataArquivos.tiraFormatacao(args[1]);
+                NfeStatusServico2.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+            if (args[0].equalsIgnoreCase("nfeStatusServico")) {
+                TrataArquivos.tiraFormatacao(args[1]);
+                NfeStatusServico4.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+	    if (args[0].equalsIgnoreCase("nfeEvento2")) {
                 TrataArquivos.tiraFormatacao(args[1]);
                 RecepcaoEvento.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+	    if (args[0].equalsIgnoreCase("nfeEvento")) {
+                TrataArquivos.tiraFormatacao(args[1]);
+                RecepcaoEvento4.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+            if (args[0].equalsIgnoreCase("nfeConsultaDest")) {
+                TrataArquivos.tiraFormatacao(args[1]);
+                NfeConsultaDest.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
+            }
+            if (args[0].equalsIgnoreCase("nfeDistribuicaoDfe")) {
+                TrataArquivos.tiraFormatacao(args[1]);
+                NfeDistribuicaoDfe.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
             }
             if (args[0].equalsIgnoreCase("cadConsultaCadastro")) {
                 CadConsultaCadastro.main(new String[]{args[1], args[2], args[3], args[4], args[5]});
@@ -796,6 +891,8 @@ public class Main {
             System.out.println("Erro enviando documento");
             System.out.println(ex.getLocalizedMessage());
             System.out.println(ex.getMessage());
+            ex.printStackTrace();
+            
             if (ex  instanceof java.rmi.RemoteException) {
              ((java.rmi.RemoteException)ex).getMessage();
             }

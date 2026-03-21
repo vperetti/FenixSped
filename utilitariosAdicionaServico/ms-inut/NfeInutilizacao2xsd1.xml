@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.3.1-b259 (trunk-7770; 2013-10-30T04:04:22+0000) JAXWS-RI/2.2.9-b131029.1831 JAXWS-API/2.2.11 JAXB-RI/2.2.8-b131017.0915 JAXB-API/2.2.11 svn-revision#unknown. -->
+<xs:schema xmlns:tns="http://www.portalfiscal.inf.br/nfe/wsdl/NfeInutilizacao2" xmlns="http://www.portalfiscal.inf.br/nfe/wsdl/NfeInutilizacao2" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" version="1.0" targetNamespace="http://www.portalfiscal.inf.br/nfe/wsdl/NfeInutilizacao2">
+
+<xs:element name="nfeCabecMsg" type="nfeCabecMsg"/>
+
+<xs:element name="nfeDadosMsg" type="nfeInutilizacaoNF2Result"/>
+
+<xs:element name="nfeInutilizacaoNF2Result">
+<xs:complexType mixed="true">
+<xs:sequence>
+<xs:any processContents="lax" namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+
+<xs:complexType name="nfeInutilizacaoNF2Result" mixed="true">
+<xs:sequence>
+<xs:any processContents="lax" namespace="##other" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="nfeCabecMsg">
+<xs:sequence>
+<xs:element name="cUF" type="xs:string" minOccurs="0"/>
+<xs:element name="versaoDados" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+<xs:anyAttribute namespace="##other" processContents="skip"/>
+</xs:complexType>
+</xs:schema>
