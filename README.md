@@ -364,4 +364,3 @@ Este programa e software livre; voce pode redistribui-lo e/ou modifica-lo sob os
 ## Links
 
 - SourceForge: https://sourceforge.net/projects/fenixsped/
-- Suporte comercial: http://www.basepro.com.br/
