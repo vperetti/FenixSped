@@ -30,8 +30,8 @@ Os links `current` apontam para a versao em producao. Trocar de versao = trocar 
 
 ## Exemplos de regressao (`exemplos/`)
 
-XMLs reais anonimizados (CNPJ, nomes, enderecos, contatos e assinatura substituidos), gerados pelo
-Fenix. Servem para detectar quebra do gerador ou do esquema.
+XMLs reais anonimizados (CNPJ, nomes, enderecos, contatos e assinatura substituidos) com
+`tools/anonimiza.py <original> <destino>`, gerados pelo Fenix. Servem para detectar quebra do gerador ou do esquema.
 
 | Arquivo | Origem |
 |---|---|
