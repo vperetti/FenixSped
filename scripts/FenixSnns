@@ -114,11 +114,11 @@ fi
 
 
 
-#sendo DOURADOS direciona para Betha
+#CHG-1130: DOURADOS migrou para o Emissor Nacional em 01/09/2026 - nao direciona mais para Betha
+#if [ "$CodigoMuni" == "500370" ];then
+# cComando="betha_$1"
+#fi
 if [ "$1" != "snns_assinar" ];then
-if [ "$CodigoMuni" == "500370" ];then
- cComando="betha_$1"
-fi
 
 #sendo SINOP direciona para Coplan
 if [ "$CodigoMuni" == "510790" ];then
@@ -164,6 +164,41 @@ curl -v --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" \
 -H "Accept: application/json" \
 --data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno 2>> /basepro/logs/FenixSnns.log
 
+# CHG-1130: E0014 = ja existe NFS-e gerada de uma DPS com esta serie/numero (resposta perdida, timeout, ou
+# numero consumido por outro emissor, ex.: Betha). Consulta /dps/{id} para achar a NFS-e, baixa o XML dela e
+# SO adota a chave se tomador e vServ conferem com a DPS enviada. Se nao conferem, mantem o erro com orientacao.
+if grep -q '"E0014"' "$cCaminho_e_File_Retorno"; then
+   cIdDPS=$(grep -o 'infDPS Id="[^"]*"' "$cCaminho_e_File_Copia" | head -1 | sed 's/.*Id="\([^"]*\)".*/\1/')
+   cTomaDPS=$(tr -d '\n\r' < "$cCaminho_e_File_Copia" | sed 's/.*<toma>//; s/<\/toma>.*//' | grep -o '<CNPJ>[^<]*\|<CPF>[^<]*' | head -1 | cut -d'>' -f2)
+   cVServDPS=$(grep -o '<vServ>[^<]*' "$cCaminho_e_File_Copia" | head -1 | cut -c8-)
+   echo "E0014 para $cIdDPS (toma $cTomaDPS vServ $cVServDPS) - consultando /SefinNacional/dps" >> /basepro/logs/FenixSnns.log
+   cChave=$(curl -s --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" -H "Accept: application/json" \
+            "https://sefin.nfse.gov.br/SefinNacional/dps/$cIdDPS" | jq -r '.chaveAcesso // empty')
+   if [ -n "$cChave" ]; then
+      cXmlNFSe="$cCaminho_e_File_Retorno-nfse-$cChave.xml"
+      curl -s --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" -H "Accept: application/json" \
+           "https://sefin.nfse.gov.br/SefinNacional/nfse/$cChave" | jq -r '.nfseXmlGZipB64 // empty' \
+           | base64 -d 2>/dev/null | gunzip 2>/dev/null > "$cXmlNFSe"
+      cDhProc=$(grep -o '<dhProc>[^<]*' "$cXmlNFSe" | head -1 | cut -c9-)
+      cNNFSe=$(grep -o '<nNFSe>[^<]*' "$cXmlNFSe" | head -1 | cut -c8-)
+      cTomaNFSe=$(tr -d '\n\r' < "$cXmlNFSe" | sed 's/.*<toma>//; s/<\/toma>.*//' | grep -o '<CNPJ>[^<]*\|<CPF>[^<]*' | head -1 | cut -d'>' -f2)
+      cVServNFSe=$(grep -o '<vServ>[^<]*' "$cXmlNFSe" | head -1 | cut -c8-)
+      cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-E0014-"$( date +%Y%m%d%H%M%S%N )
+      if [ -n "$cDhProc" ] && [ "$cTomaDPS" == "$cTomaNFSe" ] && [ "$cVServDPS" == "$cVServNFSe" ]; then
+         jq -n --arg c "$cChave" --arg d "$cDhProc" --arg i "$cIdDPS" \
+            '{tipoAmbiente:1,versaoAplicativo:"FenixSnns-recupera-E0014",dataHoraProcessamento:$d,idDPS:$i,chaveAcesso:$c}' \
+            > $cCaminho_e_File_Retorno
+         echo "E0014 recuperado: NFS-e $cNNFSe chave $cChave dhProc $cDhProc" >> /basepro/logs/FenixSnns.log
+      else
+         jq --arg m "NFS-e $cNNFSe (chave $cChave, tomador $cTomaNFSe, vServ $cVServNFSe) NAO confere com esta DPS (tomador $cTomaDPS, vServ $cVServDPS). Numero ja consumido por outra NFS-e: reemitir com NOVO numero." \
+            '.erros[0].Complemento = $m' $cCaminho_e_File_Retorno > $cCaminho_e_File_Retorno.tmp && mv $cCaminho_e_File_Retorno.tmp $cCaminho_e_File_Retorno
+         echo "E0014 NAO recuperado: NFS-e $cNNFSe nao confere (toma $cTomaNFSe vServ $cVServNFSe)" >> /basepro/logs/FenixSnns.log
+      fi
+   else
+      echo "E0014 sem chave na consulta /dps - retorno mantido" >> /basepro/logs/FenixSnns.log
+   fi
+fi
+
 cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-"$( date +%Y%m%d%H%M%S%N )
 
 #curl -v --tlsv1.2 --cert "$cCaminho_e_File_Certificado.pem" -X POST "https://sefin.nfse.gov.br/SefinNacional/nfse" -H "Content-Type: application/json" -H "Accept: application/json" --data-binary "@$cCaminho_e_File_Copia.json" > $cCaminho_e_File_Retorno
@@ -200,6 +235,112 @@ fi
 
 
 
+
+# ============================================================================================================
+# CHG-1130: cancelamento e consulta de NFS-e no Emissor Nacional (SefinNacional). Certificado: usa o .pem
+# convertido pelo snns_nfeRecepcao; se ainda nao existir, converte aqui com a senha recebida em $5.
+# ============================================================================================================
+if [ "$cComando" == "snns_nfeCancelamento" ];then
+cCaminho_e_File_Copia=$2
+cCaminho_e_File_Retorno=$3
+cCaminho_e_File_Certificado=$4
+cSenha_do_Certificado=$5
+[ -f "$cCaminho_e_File_Certificado.pem" ] || openssl pkcs12 -in "$cCaminho_e_File_Certificado" -out "$cCaminho_e_File_Certificado.pem" -nodes -passin pass:"$cSenha_do_Certificado" 2>/dev/null
+
+cChave=$(tr -d '\n\r' < "$cCaminho_e_File_Copia" | grep -o '<chNFSe>[^<]*' | head -1 | cut -c9-)
+echo "SNNS Cancelamento (evento e101101) chave '$cChave' arquivo $cCaminho_e_File_Copia" >> /basepro/logs/FenixSnns.log
+if [ ${#cChave} -ne 50 ]; then
+   jq -n --arg m "Chave de acesso invalida no pedido de evento: '$cChave'" '{erros:[{Codigo:"FENIX",Descricao:$m}]}' > "$cCaminho_e_File_Retorno"
+   exit
+fi
+
+CONTEUDO_B64=$(gzip -c "$cCaminho_e_File_Copia" | base64 -w 0)
+echo "{}" | jq --arg xml "$CONTEUDO_B64" '.pedidoRegistroEventoXmlGZipB64 = $xml' > "$cCaminho_e_File_Copia.json"
+
+curl -s --tlsv1.2 --insecure --cert "$cCaminho_e_File_Certificado.pem" \
+  -X POST "https://sefin.nfse.gov.br/SefinNacional/nfse/$cChave/eventos" \
+  -H "Content-Type: application/json" -H "Accept: application/json" \
+  --data-binary "@$cCaminho_e_File_Copia.json" > "$cCaminho_e_File_Retorno" 2>> /basepro/logs/FenixSnns.log
+
+echo "  resposta: $(head -c 500 "$cCaminho_e_File_Retorno" | tr -d '\n')" >> /basepro/logs/FenixSnns.log
+cp "$cCaminho_e_File_Retorno" "$cCaminho_e_File_Retorno-$( date +%Y%m%d%H%M%S%N )"
+exit
+fi
+
+if [ "$cComando" == "snns_nfeConsulta" ];then
+cArqEnvio=$2
+cRet=$3
+cCert=$4
+cSenha=$5
+[ -f "$cCert.pem" ] || openssl pkcs12 -in "$cCert" -out "$cCert.pem" -nodes -passin pass:"$cSenha" 2>/dev/null
+API="https://sefin.nfse.gov.br/SefinNacional"
+CURL="curl -s --tlsv1.2 --insecure --cert $cCert.pem -H Accept:application/json"
+
+cChave=$(tr -d '\n\r' < "$cArqEnvio" | grep -o '<chNFSe>[^<]*' | head -1 | cut -c9-)
+cIdDPS=$(tr -d '\n\r' < "$cArqEnvio" | grep -o '<idDPS>[^<]*'  | head -1 | cut -c8-)
+cTomaFenix=$(tr -d '\n\r' < "$cArqEnvio" | grep -o '<CNPJToma>[^<]*' | head -1 | cut -c11-)
+lPorDPS=0
+echo "SNNS Consulta chave='$cChave' idDPS='$cIdDPS' toma='$cTomaFenix'" >> /basepro/logs/FenixSnns.log
+
+# sem chave nacional (nota antiga ou resposta perdida): descobre a chave pelo id da DPS
+if [ ${#cChave} -ne 50 ] && [ -n "$cIdDPS" ]; then
+   cChave=$($CURL "$API/dps/$cIdDPS" | jq -r '.chaveAcesso // empty')
+   lPorDPS=1
+   echo "  /dps/$cIdDPS -> chave '$cChave'" >> /basepro/logs/FenixSnns.log
+fi
+if [ ${#cChave} -ne 50 ]; then
+   jq -n '{situacao:"naoencontrada",mensagem:"NFS-e nao encontrada no Emissor Nacional para esta DPS"}' > "$cRet"
+   exit
+fi
+
+cJson=$($CURL "$API/nfse/$cChave")
+cXml=$(echo "$cJson" | jq -r '.nfseXmlGZipB64 // empty' | base64 -d 2>/dev/null | gunzip 2>/dev/null)
+if [ -z "$cXml" ]; then
+   cMsg=$(echo "$cJson" | jq -r 'if .erros then (.erros[0].Codigo + " - " + .erros[0].Descricao) else "sem resposta do Emissor Nacional" end' 2>/dev/null)
+   jq -n --arg m "$cMsg" --arg c "$cChave" '{situacao:"erro",chaveAcesso:$c,mensagem:$m}' > "$cRet"
+   echo "  erro: $cMsg" >> /basepro/logs/FenixSnns.log
+   exit
+fi
+echo "$cXml" > "$cRet-nfse.xml"
+nNFSe=$(echo "$cXml" | grep -o '<nNFSe>[^<]*' | head -1 | cut -c8-)
+dhProc=$(echo "$cXml" | grep -o '<dhProc>[^<]*' | head -1 | cut -c9-)
+
+# chave descoberta pelo id da DPS: so vincula se o tomador da NFS-e for o mesmo da nota do Fenix.
+# (a Betha renumerava as DPS, entao o id pode apontar para a NFS-e de OUTRA nota do Fenix)
+if [ "$lPorDPS" == "1" ] && [ -n "$cTomaFenix" ]; then
+   cTomaNFSe=$(echo "$cXml" | tr -d '\n\r' | sed 's/.*<toma>//; s/<\/toma>.*//' | grep -o '<CNPJ>[^<]*\|<CPF>[^<]*' | head -1 | cut -d'>' -f2)
+   if [ "$cTomaNFSe" != "$cTomaFenix" ]; then
+      jq -n --arg c "$cChave" --arg n "$nNFSe" --arg t "$cTomaNFSe" --arg f "$cTomaFenix" \
+         '{situacao:"erro",mensagem:("NFS-e " + $n + " encontrada pelo id da DPS pertence a OUTRO tomador (" + $t + ", nota do Fenix " + $f + "). Numero consumido: reemitir com novo numero. Chave " + $c)}' > "$cRet"
+      echo "  NAO vinculada: tomador NFS-e $cTomaNFSe != Fenix $cTomaFenix" >> /basepro/logs/FenixSnns.log
+      cp "$cRet" "$cRet-$( date +%Y%m%d%H%M%S%N )"
+      exit
+   fi
+fi
+
+# evento de cancelamento registrado? O caminho que responde e o completo (tipo + sequencial): /eventos e
+# /eventos/101101 devolvem 404. A resposta traz eventos[] com tipoEvento, numeroPedidoRegistroEvento,
+# dataHoraRecebimento e arquivoXml (gzip em base64, as vezes base64 duplo).
+cEvt=$($CURL "$API/nfse/$cChave/eventos/101101/1")
+cTipoEvt=$(echo "$cEvt" | jq -r '.eventos[0].tipoEvento // empty' 2>/dev/null)
+if [ "$cTipoEvt" == "101101" ]; then
+   nPed=$(echo "$cEvt" | jq -r '.eventos[0].numeroPedidoRegistroEvento // 1' 2>/dev/null)
+   dhEvt=$(echo "$cEvt" | jq -r '.eventos[0].dataHoraRecebimento // empty' 2>/dev/null)
+   idEvt=$(printf 'EVT%s101101%03d' "$cChave" "$nPed")
+   cB64=$(echo "$cEvt" | jq -r '.eventos[0].arquivoXml // empty' 2>/dev/null)
+   { echo "$cB64" | base64 -d 2>/dev/null | gunzip 2>/dev/null || echo "$cB64" | base64 -d 2>/dev/null | base64 -d 2>/dev/null | gunzip 2>/dev/null; } > "$cRet-evento.xml"
+   dhEvtXml=$(grep -o '<dhEvento>[^<]*' "$cRet-evento.xml" | head -1 | cut -c11-)
+   [ -n "$dhEvtXml" ] && dhEvt="$dhEvtXml"
+   jq -n --arg c "$cChave" --arg n "$nNFSe" --arg d "$dhProc" --arg e "$idEvt" --arg de "$dhEvt" \
+      '{situacao:"cancelada",chaveAcesso:$c,nNFSe:$n,dhProc:$d,idEventoCanc:$e,dhCancel:$de,mensagem:("NFS-e " + $n + " CANCELADA no Emissor Nacional em " + $de)}' > "$cRet"
+else
+   jq -n --arg c "$cChave" --arg n "$nNFSe" --arg d "$dhProc" \
+      '{situacao:"autorizada",chaveAcesso:$c,nNFSe:$n,dhProc:$d,mensagem:("NFS-e " + $n + " autorizada no Emissor Nacional em " + $d)}' > "$cRet"
+fi
+echo "  resultado: $(cat "$cRet" | tr -d '\n')" >> /basepro/logs/FenixSnns.log
+cp "$cRet" "$cRet-$( date +%Y%m%d%H%M%S%N )"
+exit
+fi
 
 if [ "$cComando" == "betha_snns_nfeRecepcao" ];then
 
@@ -307,6 +448,39 @@ ARQUIVO_ENVELOPE="$ARQUIVO_DPS-envelope.xml"
 echo "Betha Cancelamento" >> /basepro/logs/FenixSnns.log
 
 # SAV gera <RecepcionarEventoCancelamento> completo - incluir diretamente no SOAP body
+cat <<EOF > $ARQUIVO_ENVELOPE
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="http://www.betha.com.br/e-nota-dps" xmlns:xd="http://www.w3.org/2000/09/xmldsig#">
+   <soapenv:Header/>
+   <soapenv:Body>
+      $CONTEUDO_DPS
+   </soapenv:Body>
+</soapenv:Envelope>
+EOF
+
+curl --request POST --cert "$cCaminho_e_File_Certificado.pem" \
+  --url https://nota-eletronica.betha.cloud/dps/ws \
+  --header 'Content-Type: text/xml;charset=UTF-8' \
+  --header 'SOAPAction: ""' \
+  --header 'Expect:' \
+  --data @$ARQUIVO_ENVELOPE \
+  --verbose > $cCaminho_e_File_Retorno
+
+cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-"$( date +%Y%m%d%H%M%S%N )
+
+exit
+fi
+
+
+if [ "$cComando" == "betha_snns_nfeConsulta" ];then
+
+ARQUIVO_DPS=$cCaminho_e_File_Copia
+CONTEUDO_DPS=$(sed 's/<?xml[^>]*?>//g' "$ARQUIVO_DPS")
+ARQUIVO_ENVELOPE="$ARQUIVO_DPS-envelope.xml"
+
+echo "Betha Consulta" >> /basepro/logs/FenixSnns.log
+
+# SAV gera <ConsultarStatusDpsEnvio> completo - incluir diretamente no SOAP body
 cat <<EOF > $ARQUIVO_ENVELOPE
 <?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns="http://www.betha.com.br/e-nota-dps" xmlns:xd="http://www.w3.org/2000/09/xmldsig#">

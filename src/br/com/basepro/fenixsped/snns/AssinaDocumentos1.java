@@ -198,6 +198,8 @@ public class AssinaDocumentos1 {
 
         if (tipoDocumento.equals("DPS")) {
             tag = "infDPS";
+        } else if (tipoDocumento.equals("pedRegEvento")) { // CHG-1130: pedido de registro de evento NFS-e (cancelamento e101101)
+            tag = "infPedReg";
         } else if (tipoDocumento.equals("enviNFe")) {
             tag = "infNFe";
         } else if (tipoDocumento.equals("NFe")) {
@@ -569,11 +571,9 @@ public class AssinaDocumentos1 {
                 fw.write(bufferNFe.substring(0));  
                 fw.close();
                         
-                if (codigoMunicipio.equalsIgnoreCase("500370")) { // DOURADOS
-                    t.assinar_betha(caminhoXmlNFe, caminhoCertificado, senha, caminhoXmlNFe+"-assinado");    
-                }else{
-                    t.assinar(caminhoXmlNFe, caminhoCertificado, senha, caminhoXmlNFe+"-assinado");    
-                }
+                // CHG-1130: Dourados (500370) migrou para o Emissor Nacional em 01/09/2026 - assina como os demais (Id maiusculo).
+                // O ramo assinar_betha (atributo id minusculo) era exclusivo do webservice Betha.
+                t.assinar(caminhoXmlNFe, caminhoCertificado, senha, caminhoXmlNFe+"-assinado");
             
 
                 
@@ -630,11 +630,8 @@ public class AssinaDocumentos1 {
 
 
                 
-                if (codigoMunicipio.equalsIgnoreCase("500370")) { // DOURADOS
-                    t.assinar_betha(caminhoXml, caminhoCertificado, senha, arquivoXmlNovo);
-                }else{
-                    t.assinar(caminhoXml, caminhoCertificado, senha, arquivoXmlNovo);
-                }
+                // CHG-1130: Dourados (500370) migrou para o Emissor Nacional em 01/09/2026 - assina como os demais (Id maiusculo).
+                t.assinar(caminhoXml, caminhoCertificado, senha, arquivoXmlNovo);
 
             }
             
