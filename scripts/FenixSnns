@@ -126,6 +126,77 @@ if [ "$CodigoMuni" == "510790" ];then
 fi
 fi
 
+#INC-11763: CUIABA - ate a competencia 10/2026 a NFS-e sai pelo webservice ISSNet "NFS-e Padrao Nacional"
+#(a prefeitura so habilita o Emissor Nacional em 01/11/2026; antes disso o SefinNacional devolve E0039).
+#O corte e pela tag dCompet da DPS, igual ao NFSe_Cuiaba_Via_ISSNet() do savnf_es_.
+if [ "$CodigoMuni" == "510340" ] && [ "$1" == "snns_nfeRecepcao" ];then
+ dCompetDPS=$(tr -d '\n\r' < "$2" | grep -o '<dCompet>[^<]*' | head -1 | cut -c10- | tr -d '-')
+ if [ -n "$dCompetDPS" ] && [ "$dCompetDPS" -lt 20261101 ];then
+  cComando="issnet_$1"
+ fi
+fi
+
+if [ "$cComando" == "issnet_snns_nfeRecepcao" ];then
+
+cCaminho_e_File_Copia=$2
+cCaminho_e_File_Retorno=$3
+cCaminho_e_File_Certificado=$4
+
+cUrlISSNet="https://wscuiaba.issnetonline.com.br/wsnfsenacional/nfse.asmx"
+cNsISSNet="http://www.sped.fazenda.gov.br/nfse"
+ARQUIVO_ENVELOPE="$cCaminho_e_File_Copia-envelope.xml"
+ARQUIVO_SOAP="$cCaminho_e_File_Retorno.soap"
+
+echo "ISSNet Nacional GerarNfse $(date "+%Y-%m-%d %H:%M:%S") $cCaminho_e_File_Copia" >> /basepro/logs/FenixSnns.log
+
+# versao do cabecalho = versao da DPS (1.00 sem o grupo IBSCBS, 1.01 com)
+cVersaoDPS=$(tr -d '\n\r' < "$cCaminho_e_File_Copia" | grep -o '<DPS [^>]*versao="[^"]*"' | head -1 | sed 's/.*versao="\([^"]*\)".*/\1/')
+if [ -z "$cVersaoDPS" ];then
+ cVersaoDPS="1.00"
+fi
+
+# O XML vai CRU dentro de nfseCabecMsg/nfseDadosMsg (CDATA ou texto escapado = E160/E232).
+# A DPS assinada entra byte a byte (so sai a declaracao <?xml ?>), senao a assinatura quebra.
+{
+ printf '%s' '<?xml version="1.0" encoding="utf-8"?>'
+ printf '%s' "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:nfse=\"$cNsISSNet\">"
+ printf '%s' '<soapenv:Header/><soapenv:Body><nfse:GerarNfse>'
+ printf '%s' "<nfseCabecMsg><cabecalho versao=\"$cVersaoDPS\" xmlns=\"$cNsISSNet\"><versaoDados>$cVersaoDPS</versaoDados></cabecalho></nfseCabecMsg>"
+ printf '%s' "<nfseDadosMsg><GerarNfseEnvio xmlns=\"$cNsISSNet\">"
+ sed 's/<?xml[^>]*?>//' "$cCaminho_e_File_Copia"
+ printf '%s' '</GerarNfseEnvio></nfseDadosMsg></nfse:GerarNfse></soapenv:Body></soapenv:Envelope>'
+} > "$ARQUIVO_ENVELOPE"
+
+curl -s --tlsv1.2 --cert "$cCaminho_e_File_Certificado.pem" \
+  -X POST "$cUrlISSNet" \
+  -H 'Content-Type: text/xml;charset=UTF-8' \
+  -H "SOAPAction: \"$cNsISSNet/GerarNfse\"" \
+  --data-binary "@$ARQUIVO_ENVELOPE" > "$ARQUIVO_SOAP" 2>> /basepro/logs/FenixSnns.log
+
+# A resposta vem dentro do Body (crua ou escapada): fica so o <GerarNfseResposta>, que o Fenix le como o retorno de Sinop.
+if grep -q '&lt;GerarNfseResposta' "$ARQUIVO_SOAP"; then
+ cResposta=$(tr -d '\r\n' < "$ARQUIVO_SOAP" | sed 's/&lt;/</g; s/&gt;/>/g; s/&quot;/"/g; s/&amp;/\&/g' | grep -o '<GerarNfseResposta.*</GerarNfseResposta>')
+else
+ cResposta=$(tr -d '\r\n' < "$ARQUIVO_SOAP" | grep -o '<GerarNfseResposta.*</GerarNfseResposta>')
+fi
+
+if [ -z "$cResposta" ];then
+ # sem resposta util (HTTP de erro, pagina HTML, SOAP Fault): devolve uma rejeicao legivel
+ cTexto=$(tr -d '\r\n' < "$ARQUIVO_SOAP" | sed 's/<[^>]*>/ /g; s/&[a-z]*;/ /g' | tr -s ' ' | cut -c1-150)
+ cResposta="<GerarNfseResposta xmlns=\"$cNsISSNet\"><ListaMensagemRetorno><MensagemRetorno><Codigo>9998</Codigo><Mensagem>Sem resposta valida do webservice ISSNet: $cTexto</Mensagem></MensagemRetorno></ListaMensagemRetorno></GerarNfseResposta>"
+elif echo "$cResposta" | grep -q '<ListaNfse>'; then
+ # nota gerada: os alertas trazem <Codigo> e o Fenix os leria como rejeicao
+ cResposta=$(echo "$cResposta" | sed 's/<ListaMensagemAlertaRetorno>.*<\/ListaMensagemAlertaRetorno>//')
+fi
+
+printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' > "$cCaminho_e_File_Retorno"
+printf '%s\n' "$cResposta" >> "$cCaminho_e_File_Retorno"
+
+cp $cCaminho_e_File_Retorno $cCaminho_e_File_Retorno"-"$( date +%Y%m%d%H%M%S%N )
+
+exit
+fi
+
 if [ "$cComando" == "snns_nfeRecepcao" ];then
 
 
